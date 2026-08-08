@@ -4,7 +4,7 @@
 [![depthbake-runtime on npm](https://img.shields.io/npm/v/depthbake-runtime?label=depthbake-runtime)](https://www.npmjs.com/package/depthbake-runtime)
 [![depthbake-three on npm](https://img.shields.io/npm/v/depthbake-three?label=depthbake-three)](https://www.npmjs.com/package/depthbake-three)
 
-https://github.com/user-attachments/assets/6c365f60-f97d-4a50-b25d-e14a48d6000f
+https://github.com/user-attachments/assets/b712eb9f-64e0-483f-915a-6558d7c8d003
 
 A local-first depth image pipeline for the creative web.
 
