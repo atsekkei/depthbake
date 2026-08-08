@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "source": {
+    "file": "bust.jpg",
+    "width": 6000,
+    "height": 4000
+  },
+  "depth": {
+    "width": 746,
+    "height": 497,
+    "space": "disparity",
+    "orientation": "near=1",
+    "normalization": {
+      "min": 0.3120926320552826,
+      "max": 5.072333812713623
+    }
+  },
+  "mask": {
+    "file": "mask.png"
+  },
+  "normal": {
+    "file": "normal.png"
+  },
+  "camera": {
+    "fovDeg": 55,
+    "farRange": 12
+  },
+  "sky": {
+    "threshold": 0.03
+  },
+  "model": {
+    "name": "onnx-community/depth-anything-v2-small",
+    "revision": "main"
+  },
+  "bakedAt": "2026-07-23T06:37:11.238Z",
+  "sourceHash": "1acad86349b202cfd76a432220540327e82e37cbb028ebcc6090fdc70cf8b312",
+  "photo": {
+    "file": "photo.avif",
+    "width": 2048,
+    "height": 1365,
+    "sources": [
+      {
+        "file": "photo.avif",
+        "type": "image/avif"
+      },
+      {
+        "file": "photo.webp",
+        "type": "image/webp"
+      },
+      {
+        "file": "photo.jpg",
+        "type": "image/jpeg"
+      }
+    ]
+  }
+}

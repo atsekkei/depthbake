@@ -1,0 +1,8 @@
+{
+  // Build-time type-check for the deployed app (src only).
+  // examples/* are acceptance-test scenes covered by `pnpm typecheck`, not by the
+  // deploy build. Note: src depends on photospace-core, which re-exports from the
+  // photospace-runtime dist, so `pnpm build` runs `build:runtime` first.
+  "extends": "./tsconfig.json",
+  "include": ["src"]
+}

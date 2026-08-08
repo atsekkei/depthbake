@@ -1,0 +1,17 @@
+{
+  "name": "photospace-core",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Photospace の推論・正規化・アップサンプリング・パッキングの共有ロジック(viewer/CLI 双方から利用、非公開ワークスペース内部パッケージ)",
+  "type": "module",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "photospace-runtime": "workspace:*"
+  }
+}

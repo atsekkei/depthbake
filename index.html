@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photospace</title>
+</head>
+<body class="app-shell">
+<div class="app-grid">
+
+  <details class="panel panel--title">
+    <summary class="panel__bar">
+      <span class="panel__title">Photospace</span>
+      <span class="panel__chevron" aria-hidden="true"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></span>
+    </summary>
+    <div class="panel__body">
+      <p class="panel__copy">A local-first depth image pipeline for the creative web.</p>
+      <p class="panel__copy">
+        Drop a photo, estimate depth in the browser (WebGPU/WASM), preview depth-aware effects,
+        and export a <code>.photospace</code> package. Everything runs locally — nothing is uploaded.
+      </p>
+      <div class="link-list">
+        <a class="link-list__item" href="https://github.com/atsekkei/photospace" target="_blank" rel="noopener noreferrer">GitHub<span aria-hidden="true">↗</span></a>
+        <a class="link-list__item" href="https://www.npmjs.com/package/photospace-cli" target="_blank" rel="noopener noreferrer">npm / photospace-cli<span aria-hidden="true">↗</span></a>
+        <a class="link-list__item" href="https://www.npmjs.com/package/photospace-runtime" target="_blank" rel="noopener noreferrer">npm / photospace-runtime<span aria-hidden="true">↗</span></a>
+        <a class="link-list__item" href="https://www.npmjs.com/package/photospace-three" target="_blank" rel="noopener noreferrer">npm / photospace-three<span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </details>
+
+  <details class="panel panel--examples">
+    <summary class="panel__bar">
+      <span class="panel__title">Examples</span>
+      <span class="panel__chevron" aria-hidden="true"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></span>
+    </summary>
+    <div class="panel__body">
+      <ol class="index-list">
+        <li><a class="index-list__item" href="https://github.com/atsekkei/photospace/tree/main/examples/hero" target="_blank" rel="noopener noreferrer">
+          <span class="index-list__name">hero<span aria-hidden="true">↗</span></span>
+          <span class="index-list__desc">Copy-paste starter — pointer follow, idle autopilot, reduced-motion.</span>
+        </a></li>
+        <li><a class="index-list__item" href="https://github.com/atsekkei/photospace/tree/main/examples/three-scene" target="_blank" rel="noopener noreferrer">
+          <span class="index-list__name">three-scene<span aria-hidden="true">↗</span></span>
+          <span class="index-list__desc">three.js scene that loads a package into a custom shader.</span>
+        </a></li>
+        <li><a class="index-list__item" href="https://github.com/atsekkei/photospace/tree/main/examples/depth-splats" target="_blank" rel="noopener noreferrer">
+          <span class="index-list__name">depth-splats<span aria-hidden="true">↗</span></span>
+          <span class="index-list__desc">Depth-placed point cloud, importance-sampled from the photo.</span>
+        </a></li>
+        <li><a class="index-list__item" href="https://github.com/atsekkei/photospace/tree/main/examples/relight" target="_blank" rel="noopener noreferrer">
+          <span class="index-list__name">relight<span aria-hidden="true">↗</span></span>
+          <span class="index-list__desc">Cursor-driven point light using depth + normal maps.</span>
+        </a></li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="panel panel--controls" open>
+    <summary class="panel__bar">
+      <span class="panel__title">Controls</span>
+      <span class="panel__chevron" aria-hidden="true"><svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></span>
+    </summary>
+    <div class="panel__body panel__body--scroll">
+      <div id="err" class="error-message"></div>
+
+      <div class="control-group">
+        <div class="button-group">
+          <button id="rst" class="button button--primary">Change Photo</button>
+        </div>
+      </div>
+
+      <form id="packageForm" class="control-group">
+        <div class="control-group__label">Package export</div>
+        <div class="export-field">
+          <label for="photoMaxSize">Photo max edge</label>
+          <input id="photoMaxSize" type="number" min="64" max="16384" step="1" value="2048" required inputmode="numeric">
+          <span>px</span>
+        </div>
+        <div class="export-field">
+          <label for="mapMaxSize">Map max edge</label>
+          <input id="mapMaxSize" type="number" min="64" max="8192" step="1" value="1024" required inputmode="numeric">
+          <span>px</span>
+        </div>
+        <div class="export-field">
+          <label for="mapMaxMb">Map size limit</label>
+          <input id="mapMaxMb" type="number" min="0" max="1000" step="0.1" value="1.5" required inputmode="decimal" aria-describedby="mapMaxMbHelp">
+          <span>MB</span>
+        </div>
+        <small id="mapMaxMbHelp" class="field-help">Combined size of the included maps. 0 disables the limit.</small>
+        <fieldset class="format-fieldset">
+          <legend>Photo formats</legend>
+          <label><input id="fmtAvif" type="checkbox" value="avif" checked> AVIF</label>
+          <label><input id="fmtWebp" type="checkbox" value="webp" checked> WebP</label>
+          <label><input id="fmtJpeg" type="checkbox" value="jpeg" checked disabled> JPEG (always)</label>
+        </fieldset>
+        <fieldset class="format-fieldset">
+          <legend>Extra maps</legend>
+          <label><input id="mapMask" type="checkbox" value="mask"> Sky/edge mask</label>
+          <label><input id="mapNormal" type="checkbox" value="normal"> Normals</label>
+        </fieldset>
+        <button id="expPkg" class="button button--primary button--block" type="submit">Download package (.zip)</button>
+      </form>
+
+      <div class="control-group">
+        <div class="control-group__label">Effect</div>
+        <div class="button-group">
+          <button id="m0" class="button is-active">Ripple</button>
+          <button id="m1" class="button">Torch</button>
+          <button id="m2" class="button">Isolines</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-group__label">View</div>
+        <div class="button-group">
+          <button id="v0" class="button is-active">Result</button>
+          <button id="v1" class="button">Depth</button>
+          <button id="v2" class="button">Normal</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-group__label">Camera / Depth</div>
+        <div class="slider-control"><label class="slider-control__name" for="fov">FOV</label><input class="slider-control__input" type="range" id="fov" min="30" max="100" step="1" value="55"><span class="slider-control__value" id="fovV">55°</span></div>
+        <div class="slider-control"><label class="slider-control__name" for="far">Depth range</label><input class="slider-control__input" type="range" id="far" min="3" max="40" step="0.5" value="12"><span class="slider-control__value" id="farV">12</span></div>
+        <div class="slider-control"><label class="slider-control__name" for="sky">Sky threshold</label><input class="slider-control__input" type="range" id="sky" min="0" max="0.25" step="0.005" value="0.03"><span class="slider-control__value" id="skyV">.03</span></div>
+      </div>
+
+      <p id="hint" class="hint-panel">
+        Photo formats are bundled as available and listed in meta.json; the runtime tries them in order,
+        with JPEG always included as the universal fallback. Extra maps are optional and declared in meta.json.
+        All included maps share one resolution — if their combined PNG size exceeds the limit,
+        they are rebaked at a smaller common resolution.
+      </p>
+    </div>
+  </details>
+
+  <main id="stage" class="stage">
+    <div class="dropzone-stack">
+      <label id="drop" class="dropzone" for="file" role="button" tabindex="0"><b>Drop a photo</b> or click to select<br><br>
+        Bake a depth-aware WebGL asset locally.<br>First run downloads a depth model (~25–50MB).</label>
+      <div id="bar" class="progress-bar" role="progressbar" aria-label="Model download progress" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar__fill"></div></div>
+    </div>
+    <canvas id="cv" class="photo-canvas" style="display:none"></canvas>
+    <input type="file" id="file" accept="image/*" style="display:none">
+  </main>
+
+  <span id="status" class="app-status">Idle</span>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

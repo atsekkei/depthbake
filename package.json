@@ -1,0 +1,55 @@
+{
+  "name": "photo-space",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@10.18.0",
+  "scripts": {
+    "dev": "vite",
+    "dev:three-scene": "vite --config examples/three-scene/vite.config.ts",
+    "dev:depth-splats": "vite --config examples/depth-splats/vite.config.ts",
+    "dev:relight": "vite --config examples/relight/vite.config.ts",
+    "dev:hero": "vite --config examples/hero/vite.config.ts",
+    "build": "pnpm build:runtime && pnpm build:three && tsc -p tsconfig.build.json && vite build",
+    "build:three-scene": "vite build --config examples/three-scene/vite.config.ts",
+    "build:depth-splats": "vite build --config examples/depth-splats/vite.config.ts",
+    "build:relight": "vite build --config examples/relight/vite.config.ts",
+    "build:hero": "vite build --config examples/hero/vite.config.ts",
+    "preview": "vite preview",
+    "preview:three-scene": "vite preview --config examples/three-scene/vite.config.ts",
+    "preview:depth-splats": "vite preview --config examples/depth-splats/vite.config.ts",
+    "preview:relight": "vite preview --config examples/relight/vite.config.ts",
+    "preview:hero": "vite preview --config examples/hero/vite.config.ts",
+    "cli": "pnpm --filter photospace-cli dev",
+    "build:cli": "pnpm --filter photospace-cli build",
+    "build:runtime": "pnpm --filter photospace-runtime build",
+    "build:three": "pnpm --filter photospace-three build",
+    "test": "pnpm build:runtime && node --experimental-strip-types --test packages/*/test/*.test.ts src/*/*.test.ts",
+    "typecheck": "pnpm build:runtime && pnpm build:three && pnpm -r --include-workspace-root exec tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "photospace-core": "workspace:*",
+    "photospace-runtime": "workspace:*",
+    "photospace-three": "workspace:*",
+    "three": "^0.185.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp"
+    ],
+    "overrides": {
+      "sharp": "^0.35.3"
+    }
+  }
+}

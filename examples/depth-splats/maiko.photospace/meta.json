@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "source": {
+    "file": "maiko.jpg",
+    "width": 2400,
+    "height": 1630
+  },
+  "depth": {
+    "width": 662,
+    "height": 450,
+    "space": "disparity",
+    "orientation": "near=1",
+    "normalization": {
+      "min": 0,
+      "max": 5.98029899597168
+    }
+  },
+  "mask": {
+    "file": "mask.png"
+  },
+  "normal": {
+    "file": "normal.png"
+  },
+  "camera": {
+    "fovDeg": 55,
+    "farRange": 12
+  },
+  "sky": {
+    "threshold": 0.03
+  },
+  "model": {
+    "name": "onnx-community/depth-anything-v2-small",
+    "revision": "main"
+  },
+  "bakedAt": "2026-07-23T05:52:09.778Z",
+  "sourceHash": "9d2c071ecf9fa946b3f96cc256c5ba9f8ee6f361c97214d6a4960337ed65fc77",
+  "photo": {
+    "file": "photo.avif",
+    "width": 2048,
+    "height": 1391,
+    "sources": [
+      {
+        "file": "photo.avif",
+        "type": "image/avif"
+      },
+      {
+        "file": "photo.webp",
+        "type": "image/webp"
+      },
+      {
+        "file": "photo.jpg",
+        "type": "image/jpeg"
+      }
+    ]
+  }
+}

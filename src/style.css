@@ -1,0 +1,596 @@
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+
+@layer reset, tokens, base, layout, components, states;
+
+@layer tokens {
+  :root {
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+    --color-ink: #000;
+    --color-paper: #fff;
+    --color-accent: #0075ff;
+    --color-accent-darker: #005bc7;
+    --color-ink-10: #1a1a1a;
+    --color-ink-30: #4d4d4d;
+    --color-ink-50: #808080;
+    --color-ink-70: #b3b3b3;
+    --color-ink-85: #d9d9d9;
+    --color-ink-90: #e6e6e6;
+    --color-ink-95: #f2f2f2;
+    --color-ink-95-90: #f2f2f2e6;
+    --color-surface: var(--color-ink-95);
+    --color-surface-hover: var(--color-ink-90);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    /* 12 column grid: 10px outer margin, 10px gutter */
+    --grid-margin: 10px;
+    --grid-gutter: 10px;
+    /* パネルバーの高さ。open時のbody最大高の計算に使うため固定値で持つ */
+    --bar-height: 2rem;
+
+    /* dropdownの開閉モーション。duration/easingは暫定値 */
+    --panel-motion-duration: 180ms;
+    --panel-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+    /*
+     * Fluid typography / spacing, Utopia-style linear interpolation
+     * between 360px (mobile) and 1440px (desktop) viewports.
+     * clamp(min, min + slope*100vw, max) - see:
+     * https://yuheiy.com/blog/2025/designing-the-in-between
+     */
+    --fs-base: 14px;
+  }
+}
+
+@layer reset {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* height:autoへのtransitionを許可する(縦積み時のパネル高さ) */
+  :root {
+    interpolate-size: allow-keywords;
+  }
+}
+
+@layer base {
+  .app-shell {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  button {
+    border: 1px solid var(--color-ink-85);
+    border-radius: var(--radius-full);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    padding: 4px 12px;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    user-select: none;
+  }
+
+  input[type="range"] {
+    accent-color: var(--color-accent);
+  }
+
+  input[type="number"] {
+    border: 1px solid var(--color-ink-85);
+    border-radius: var(--radius-full);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    min-width: 0;
+    padding: 4px 12px;
+  }
+
+  input:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  a:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-accent);
+    outline: none;
+  }
+
+  input:invalid {
+    border-color: var(--color-accent);
+  }
+
+  code {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer layout {
+  .app-grid {
+    display: grid;
+    gap: var(--grid-gutter);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto minmax(0, 1fr);
+    inset: var(--grid-margin);
+    position: fixed;
+  }
+
+  .panel--title {
+    grid-area: 1 / 1 / 2 / 7;
+  }
+
+  .panel--examples {
+    grid-area: 1 / 7 / 2 / 10;
+  }
+
+  .panel--controls {
+    grid-area: 1 / 10 / 2 / 13;
+  }
+
+  /* stageはcontrols列(10-12)を避けた9カラム。open/closeで画像が動かないよう固定 */
+  .stage {
+    align-items: center;
+    display: flex;
+    grid-area: 2 / 1 / 3 / 10;
+    justify-content: center;
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+    z-index: 0;
+  }
+
+  .app-status {
+    align-self: end;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    grid-area: 2 / 1 / 3 / 10;
+    justify-self: start;
+    pointer-events: none;
+    text-transform: uppercase;
+    z-index: 1;
+  }
+
+  @media (max-width: 760px) {
+    .app-grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      inset: auto;
+      padding: var(--grid-margin);
+      position: static;
+    }
+
+    .panel--title,
+    .panel--examples,
+    .panel--controls,
+    .stage,
+    .app-status {
+      grid-area: auto;
+    }
+
+    /* 縦積みではstageを先頭に。開いたcontrolsの下にドロップ先が埋もれるのを避ける */
+    .stage,
+    .app-status {
+      align-self: start;
+      order: -1;
+    }
+  }
+}
+
+@layer components {
+  .panel {
+    position: relative;
+    z-index: 2;
+  }
+
+  .panel__bar {
+    align-items: center;
+    background: var(--color-ink-95);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    gap: var(--grid-gutter);
+    justify-content: space-between;
+    list-style: none;
+    min-height: var(--bar-height);
+    padding: 4px 12px;
+    transition: background 0.12s;
+    user-select: none;
+  }
+
+  .panel__bar::-webkit-details-marker {
+    display: none;
+  }
+
+  .panel__title {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .panel__chevron {
+    align-items: center;
+    background: var(--color-ink-85);
+    border-radius: var(--radius-full);
+    color: var(--color-paper);
+    display: flex;
+    flex-shrink: 0;
+    height: calc(var(--bar-height) - 16px);
+    justify-content: center;
+    transition: background 0.12s, color 0.12s;
+    width: calc(var(--bar-height) - 16px);
+  }
+
+  .panel__chevron > svg {
+    transition: transform 0.12s;
+  }
+
+  .panel__body {
+    background: var(--color-ink-95-90);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(16px);
+    clip-path: inset(0 round var(--radius-lg));
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    left: 0;
+    padding: 12px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--grid-gutter));
+    transition: clip-path var(--panel-motion-duration) var(--panel-motion-ease),
+      opacity var(--panel-motion-duration) var(--panel-motion-ease), visibility 0s;
+  }
+
+  /*
+   * UAは閉じた<details>のcontentをcontent-visibility:hiddenで描画から外す。
+   * それだと開閉のたびに初回描画扱いになりtransitionが走らないので、常に描画させ、
+   * 見せ方はclip-path/opacity/visibilityで制御する。
+   */
+  .panel::details-content {
+    content-visibility: visible;
+  }
+
+  .panel__body--scroll {
+    max-height: calc(100dvh - var(--grid-margin) * 2 - var(--bar-height) - var(--grid-gutter));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  @media (max-width: 760px) {
+    .panel__body {
+      position: static;
+      margin-top: var(--grid-gutter);
+    }
+
+    .panel__body--scroll {
+      max-height: none;
+      overflow: visible;
+    }
+
+    /* 縦積みではbodyが流れの中にいる。後続パネルが即ジャンプしないよう高さも送る */
+    .panel::details-content {
+      height: 0;
+      overflow: hidden;
+      transition: height var(--panel-motion-duration) var(--panel-motion-ease),
+        content-visibility var(--panel-motion-duration) allow-discrete;
+    }
+
+    .panel[open]::details-content {
+      height: auto;
+    }
+  }
+
+  .panel__copy {
+    color: var(--color-ink-30);
+    line-height: 1.5;
+  }
+
+  .link-list,
+  .index-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+  }
+
+  .link-list__item,
+  .index-list__item {
+    border-radius: var(--radius-md);
+    color: var(--color-ink);
+    display: block;
+    padding: 4px 6px;
+    text-decoration: none;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .link-list__item {
+    font-family: var(--font-mono);
+  }
+
+  .link-list__item span,
+  .index-list__name span {
+    color: var(--color-ink-50);
+    margin-left: 0.4em;
+  }
+
+  .index-list {
+    counter-reset: example;
+  }
+
+  .index-list__name {
+    display: block;
+    font-family: var(--font-mono);
+  }
+
+  .index-list__name::before {
+    color: var(--color-ink-50);
+    content: counter(example, decimal-leading-zero) " ";
+    counter-increment: example;
+  }
+
+  .index-list__desc {
+    color: var(--color-ink-50);
+    display: block;
+    line-height: 1.4;
+  }
+
+  .photo-canvas {
+    border-radius: var(--radius-sm);
+    display: block;
+    max-width: 100%;
+    touch-action: none;
+  }
+
+  .dropzone-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(100%, 40rem);
+    width: 100%;
+  }
+
+  .dropzone {
+    background: var(--color-surface);
+    border: 1px dashed var(--color-ink-85);
+    border-radius: var(--radius-md);
+    color: var(--color-ink-50);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    padding: 80px 40px;
+    text-align: center;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+
+  .dropzone:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .dropzone b {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+
+  .control-group__label {
+    border-bottom: 1px solid var(--color-ink-70);
+    color: var(--color-ink-50);
+    display: block;
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .button--primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .button--block {
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  .slider-control {
+    align-items: center;
+    column-gap: 4px;
+    display: grid;
+    grid-template-areas: "name value" "slider slider";
+    grid-template-columns: 1fr auto;
+    margin-top: 4px;
+    row-gap: 6px;
+  }
+
+  .slider-control__name {
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    grid-area: name;
+  }
+
+  .slider-control__input {
+    grid-area: slider;
+    width: 100%;
+  }
+
+  .slider-control__value {
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    grid-area: value;
+    text-align: right;
+  }
+
+  .export-field {
+    align-items: center;
+    display: grid;
+    font-family: var(--font-mono);
+    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) minmax(4rem, 0.55fr) auto;
+    margin-top: 4px;
+  }
+
+  .export-field span {
+    color: var(--color-ink-50);
+  }
+
+  .field-help {
+    color: var(--color-ink-50);
+    display: block;
+    font-family: var(--font-sans);
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+
+  .format-fieldset {
+    border: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0 0;
+  }
+
+  .format-fieldset legend {
+    color: var(--color-ink-50);
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+    width: 100%;
+  }
+
+  .format-fieldset label {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 4px;
+    user-select: none;
+  }
+
+  .progress-bar {
+    background: var(--color-ink-85);
+    border-radius: var(--radius-full);
+    display: none;
+    height: 4px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .progress-bar__fill {
+    background: var(--color-accent);
+    border-radius: var(--radius-full);
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+    width: 100%;
+  }
+
+  .error-message {
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-lg);
+    color: var(--color-ink);
+    display: none;
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    padding: 4px 12px;
+  }
+
+  .hint-panel {
+    border-top: 1px solid var(--color-ink-70);
+    color: var(--color-ink-50);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    padding-top: 8px;
+  }
+}
+
+@layer states {
+  @media (hover: hover) and (pointer: fine) {
+    button:hover {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-paper);
+    }
+
+    .button--primary:hover {
+      background: var(--color-accent-darker);
+      border-color: var(--color-accent-darker);
+    }
+
+    .panel__bar:hover {
+      background: var(--color-surface-hover);
+    }
+
+    .panel__bar:hover .panel__chevron {
+      background: var(--color-ink-70);
+      color: var(--color-paper);
+    }
+
+    .link-list__item:hover,
+    .index-list__item:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-ink);
+    }
+
+    .link-list__item:hover span,
+    .index-list__item:hover .index-list__desc,
+    .index-list__item:hover .index-list__name::before,
+    .index-list__item:hover .index-list__name span {
+      color: var(--color-ink-30);
+    }
+  }
+
+  .panel[open] > .panel__bar > .panel__chevron > svg {
+    transform: rotate(180deg);
+  }
+
+  /* 閉状態 = 上端に巻き取った状態。visibilityはモーション終了後に落としてtab順から外す */
+  .panel:not([open]) .panel__body {
+    clip-path: inset(0 0 100% 0 round var(--radius-lg));
+    opacity: 0;
+    /* 閉じ始めた瞬間からstageへのクリックを通す */
+    pointer-events: none;
+    visibility: hidden;
+    transition: clip-path var(--panel-motion-duration) var(--panel-motion-ease),
+      opacity var(--panel-motion-duration) var(--panel-motion-ease),
+      visibility 0s linear var(--panel-motion-duration);
+  }
+
+  .dropzone.is-dragging {
+    background: var(--color-ink-90);
+    border-color: var(--color-ink-50);
+    color: var(--color-ink-50);
+  }
+
+  .button.is-active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
