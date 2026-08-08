@@ -10,7 +10,7 @@ A local-first depth image pipeline for the creative web.
 
 Depthbake turns still images into portable, depth-aware assets for WebGL, three.js, and custom creative coding workflows. Bake a lightweight package locally (`photo.jpg` + optional AVIF/WebP candidates / `depth.png` / `meta.json`, plus opt-in `mask.png` / `normal.png`), then drive the result with pointer, scroll, shaders, lighting, particles, or your own runtime.
 
-**Live demo: [depthbake.aokitsukasa.com](https://depthbake.aokitsukasa.com)**
+**Live demo: [depthbake.pages.dev](https://depthbake.pages.dev)**
 
 - **Browser baker** (the root app in this repo): drop in a photo, estimate depth in-browser (WebGPU/WASM), preview depth-aware effects, and export a `.depthbake` package. Everything runs locally; nothing is uploaded to a server. Export controls let you set photo/map resolution, cap the combined map PNG size, and bundle AVIF/WebP/JPEG photo variants supported by the browser.
 - **[`depthbake-cli`](packages/cli)**: runs the same inference and packing logic in Node to batch-bake production packages from a folder of images. Distributed on npm as [`depthbake-cli`](https://www.npmjs.com/package/depthbake-cli).
