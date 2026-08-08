@@ -21,9 +21,9 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: "copy-photospace-package",
+      name: "copy-depthbake-package",
       async closeBundle() {
-        await cp(resolve(root, "maiko.photospace"), resolve(root, outDir, "maiko.photospace"), {
+        await cp(resolve(root, "maiko.depthbake"), resolve(root, outDir, "maiko.depthbake"), {
           recursive: true,
         });
       },

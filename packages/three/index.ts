@@ -1,12 +1,12 @@
 import * as THREE from "three";
-import { loadPackageStaged, worldPositionFromMeta } from "photospace-runtime";
+import { loadPackageStaged, worldPositionFromMeta } from "depthbake-runtime";
 import type {
   PackageComponent,
-  PartialPhotoSpacePackage,
-  PhotoSpaceMeta,
-} from "photospace-runtime";
+  PartialDepthbakePackage,
+  DepthbakeMeta,
+} from "depthbake-runtime";
 
-// 自前のシェーダーを書くための材料。photospace-runtime からの再エクスポートで、
+// 自前のシェーダーを書くための材料。depthbake-runtime からの再エクスポートで、
 // 利用者が2パッケージからimportしなくて済むようにする。
 export {
   GLSL_SNIPPETS,
@@ -16,16 +16,16 @@ export {
   computeSkyMask,
   computeEdgeMask,
   computeNormals,
-} from "photospace-runtime";
+} from "depthbake-runtime";
 export type {
-  PhotoSpaceMeta,
-  PhotoSpacePackage,
-  PartialPhotoSpacePackage,
-  StagedPhotoSpacePackage,
+  DepthbakeMeta,
+  DepthbakePackage,
+  PartialDepthbakePackage,
+  StagedDepthbakePackage,
   PackageComponent,
   RasterF32,
   NormalRaster,
-} from "photospace-runtime";
+} from "depthbake-runtime";
 
 /**
  * GLSL_SNIPPETS が要求する uniform 一式。スニペットは uDep/uDRes/uTanF/uFar という
@@ -36,7 +36,7 @@ export type {
  * 同梱されないマップの sampler は null になる。ShaderMaterial は宣言されていない
  * uniform を無視するので、mask/normal を使わないシェーダーへそのまま渡してよい。
  */
-export interface PhotoSpaceUniforms {
+export interface DepthbakeUniforms {
   /** 写真 */
   uImg: { value: THREE.Texture | null };
   /** depth.png (RG16パックのままのRGBA8。dsp8()でシェーダー内復元する) */
@@ -57,7 +57,7 @@ export interface PhotoSpaceUniforms {
   uAspect: { value: number };
 }
 
-export interface PhotoSpaceAsset {
+export interface DepthbakeAsset {
   /** need で除外した場合は undefined */
   photo?: THREE.Texture;
   depth?: THREE.Texture;
@@ -65,15 +65,15 @@ export interface PhotoSpaceAsset {
   mask?: THREE.Texture;
   /** normal.png 同梱かつ need 対象時のみ */
   normal?: THREE.Texture;
-  meta: PhotoSpaceMeta;
+  meta: DepthbakeMeta;
   /** 写真のアスペクト比 (meta.source 由来) */
   aspect: number;
-  uniforms: PhotoSpaceUniforms;
+  uniforms: DepthbakeUniforms;
   /**
-   * photospace-runtime のパッケージ。CPU側のFloat32 (depth / skyMask / edgeMask /
+   * depthbake-runtime のパッケージ。CPU側のFloat32 (depth / skyMask / edgeMask /
    * normal) へ降りるための口で、遅延評価される。GPUへ流すだけなら触らなくてよい。
    */
-  package: PartialPhotoSpacePackage;
+  package: PartialDepthbakePackage;
   /**
    * 生成した THREE.Texture を破棄する。three の texture.dispose() と同じく
    * ImageBitmap は閉じない (閉じると package の遅延Float32が壊れるため)。
@@ -82,7 +82,7 @@ export interface PhotoSpaceAsset {
   dispose(): void;
 }
 
-export interface PhotoSpaceLoaderOptions {
+export interface DepthbakeLoaderOptions {
   /** 読み込む構成要素。省略時は同梱されているものすべて */
   need?: readonly PackageComponent[];
   /**
@@ -99,7 +99,7 @@ export interface PhotoSpaceLoaderOptions {
 }
 
 /** onProgress が報せるロード段階。loaded/total は段階数(バイト数ではない) */
-export type PhotoSpaceLoadStage = "meta" | "photo" | "depth" | "mask" | "normal";
+export type DepthbakeLoadStage = "meta" | "photo" | "depth" | "mask" | "normal";
 
 /** データ用マップ(depth/mask/normal)共通のテクスチャ設定 */
 function dataTexture(bitmap: ImageBitmap, nearest: boolean): THREE.Texture {
@@ -120,9 +120,9 @@ function dataTexture(bitmap: ImageBitmap, nearest: boolean): THREE.Texture {
 }
 
 function createAsset(
-  pkg: PartialPhotoSpacePackage,
-  options: PhotoSpaceLoaderOptions,
-): PhotoSpaceAsset {
+  pkg: PartialDepthbakePackage,
+  options: DepthbakeLoaderOptions,
+): DepthbakeAsset {
   const { meta } = pkg;
   const aspect = meta.source.width / meta.source.height;
 
@@ -138,7 +138,7 @@ function createAsset(
   const mask = pkg.maskBitmap ? dataTexture(pkg.maskBitmap, false) : undefined;
   const normal = pkg.normalBitmap ? dataTexture(pkg.normalBitmap, false) : undefined;
 
-  const uniforms: PhotoSpaceUniforms = {
+  const uniforms: DepthbakeUniforms = {
     uImg: { value: photo ?? null },
     uDep: { value: depth ?? null },
     uNrm: { value: normal ?? null },
@@ -169,21 +169,21 @@ function createAsset(
 }
 
 /**
- * Photospace パッケージを three.js のテクスチャ + uniform として読み込む。
+ * Depthbake パッケージを three.js のテクスチャ + uniform として読み込む。
  *
  * THREE.Loader を継承しているので GLTFLoader と同じ規約で使え、
  * LoadingManager にもそのまま乗る (ヒーロー画像のプログレス表示など)。
  *
  * ```ts
- * const asset = await new PhotoSpaceLoader().loadAsync("/out/hero/");
+ * const asset = await new DepthbakeLoader().loadAsync("/out/hero/");
  * const material = new THREE.ShaderMaterial({ uniforms: asset.uniforms, ... });
  * ```
  *
  * withCredentials / requestHeader は runtime の requestInit へ透過する。
  * crossOrigin は fetch に対応するオプションが無いため効かない。
  */
-export class PhotoSpaceLoader extends THREE.Loader<PhotoSpaceAsset> {
-  private options: PhotoSpaceLoaderOptions = {};
+export class DepthbakeLoader extends THREE.Loader<DepthbakeAsset> {
+  private options: DepthbakeLoaderOptions = {};
 
   /** 読み込む構成要素を絞る。指定外はフェッチもデコードもされない */
   setNeed(need: readonly PackageComponent[]): this {
@@ -218,7 +218,7 @@ export class PhotoSpaceLoader extends THREE.Loader<PhotoSpaceAsset> {
    */
   load(
     url: string,
-    onLoad: (asset: PhotoSpaceAsset) => void,
+    onLoad: (asset: DepthbakeAsset) => void,
     onProgress?: (event: ProgressEvent) => void,
     onError?: (err: unknown) => void,
   ): void {
@@ -242,7 +242,7 @@ export class PhotoSpaceLoader extends THREE.Loader<PhotoSpaceAsset> {
     });
 
     if (onProgress) {
-      const stages: Array<[PhotoSpaceLoadStage, Promise<unknown>]> = [
+      const stages: Array<[DepthbakeLoadStage, Promise<unknown>]> = [
         ["meta", staged.meta],
         ["photo", staged.photo],
         ["depth", staged.depthBitmap],
@@ -310,7 +310,7 @@ export function quantileDisparity(depth: Float32Array, quantile: number): number
   return sorted[Math.min(Math.max(index, 0), sorted.length - 1)];
 }
 
-export interface PhotoSpaceCameraOptions {
+export interface DepthbakeCameraOptions {
   /** 追いズーム。1未満で寄る。既定 0.82 */
   frameZoom?: number;
   /** 注視深度を取る分位。既定 0.1 (手前から10%) */
@@ -324,23 +324,23 @@ export interface PhotoSpaceCameraOptions {
  * FOV は meta.camera.fovDeg 由来で、setSize() が cover 表示になるよう再計算する。
  *
  * ```ts
- * const camera = new PhotoSpaceCamera(asset);
+ * const camera = new DepthbakeCamera(asset);
  * camera.setSize(window.innerWidth, window.innerHeight);
  * camera.position.set(x * 0.1 * camera.pivotZ, y * 0.055 * camera.pivotZ, 0);
  * camera.lookAt(0, 0, -camera.pivotZ);
  * ```
  */
-export class PhotoSpaceCamera extends THREE.PerspectiveCamera {
+export class DepthbakeCamera extends THREE.PerspectiveCamera {
   /** 追いズーム。変更後は setSize() を呼び直すこと */
   frameZoom: number;
-  readonly asset: PhotoSpaceAsset;
+  readonly asset: DepthbakeAsset;
 
   private baseTanHalf: number;
   private photoAspect: number;
   private pivotQuantile: number;
   private cachedPivotZ: number | undefined;
 
-  constructor(asset: PhotoSpaceAsset, options: PhotoSpaceCameraOptions = {}) {
+  constructor(asset: DepthbakeAsset, options: DepthbakeCameraOptions = {}) {
     super(asset.meta.camera.fovDeg, asset.aspect, options.near ?? 0.05, options.far ?? 60);
     this.asset = asset;
     this.frameZoom = options.frameZoom ?? 0.82;

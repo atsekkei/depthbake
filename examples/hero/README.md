@@ -1,6 +1,6 @@
 # hero
 
-The copy-paste starting point for a Photospace hero image. Unlike the other
+The copy-paste starting point for a Depthbake hero image. Unlike the other
 examples, this one isn't tuned to be a striking demo — it's deliberately
 plain so the two judgment calls it makes are easy to see and easy to lift
 into your own project:
@@ -17,7 +17,7 @@ into your own project:
    motion the media query is about. Only the idle autopilot (the orbit that
    plays when nobody's touching anything) is gated behind the check.
 
-This does **not** ship as a `PhotoSpaceMesh` component. Freezing this into a
+This does **not** ship as a `DepthbakeMesh` component. Freezing this into a
 component would present "one hero effect" as the library's opinion, when the
 shader and the motion curve are exactly the parts every project wants to
 change. Copy the file and edit it.
@@ -26,7 +26,7 @@ change. Copy the file and edit it.
 
 A mesh whose vertices are reconstructed from `depth.png` in the vertex
 shader (`wpos()`, from `GLSL_SNIPPETS`) instead of a flat plane, viewed
-through a `PhotoSpaceCamera` that drifts with the pointer — real
+through a `DepthbakeCamera` that drifts with the pointer — real
 depth-driven parallax with about 30 lines of shader.
 
 ## Run
@@ -50,7 +50,7 @@ pnpm preview:hero
 
 ```ts
 import * as THREE from "three";
-import { PhotoSpaceLoader, PhotoSpaceCamera, GLSL_SNIPPETS } from "photospace-three";
+import { DepthbakeLoader, DepthbakeCamera, GLSL_SNIPPETS } from "depthbake-three";
 
 /**
  * examples/hero — コピペ用の最小テンプレート。
@@ -62,7 +62,7 @@ import { PhotoSpaceLoader, PhotoSpaceCamera, GLSL_SNIPPETS } from "photospace-th
  * 2. prefers-reduced-motion では自動軌道だけ止め、ポインタへの追従は残す。
  *    ユーザー操作への応答を止めるのはアクセシビリティ上望ましくない
  *
- * PhotoSpaceMeshのようなコンポーネントとして固めず、コピペ前提のテンプレートとして
+ * DepthbakeMeshのようなコンポーネントとして固めず、コピペ前提のテンプレートとして
  * 出しているのは改造されることが前提だから。シェーダーもモーションも
  * 手元のプロジェクトに合わせて書き換えてよい。
  */
@@ -77,13 +77,13 @@ const PARALLAX_X = 0.1; // カメラ振幅(注視深度pivotZに対する比)
 const PARALLAX_Y = 0.055;
 
 async function main(): Promise<void> {
-  const asset = await new PhotoSpaceLoader().setNeed(["photo", "depth"]).loadAsync("./maiko.photospace/");
+  const asset = await new DepthbakeLoader().setNeed(["photo", "depth"]).loadAsync("./maiko.depthbake/");
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   document.getElementById("app")!.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new PhotoSpaceCamera(asset);
+  const camera = new DepthbakeCamera(asset);
 
   // depthから頂点位置を復元するメッシュ。PlaneGeometryのposition属性自体は使わず、
   // uv+depthから毎頂点wpos()でワールド座標を計算し直す(uv/indexの供給元として使う)
@@ -188,7 +188,7 @@ main().catch((e) => {
 
 ## Photo credit
 
-[`maiko.photospace`](./maiko.photospace) is baked from a photo by
+[`maiko.depthbake`](./maiko.depthbake) is baked from a photo by
 [Tianshu Liu](https://unsplash.com/ja/@tianshu?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
 on
 [Unsplash](https://unsplash.com/ja/%E5%86%99%E7%9C%9F/%E5%BB%BA%E7%89%A9%E3%81%AE%E8%BF%91%E3%81%8F%E3%81%A7%E7%9F%B3%E6%B2%B9%E5%82%98%E3%82%92%E6%8C%81%E3%81%A4%E5%A5%B3%E6%80%A7-khQY5Eu-aa0?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText).

@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { PhotoSpaceLoader, GLSL_SNIPPETS } from "photospace-three";
+import { DepthbakeLoader, GLSL_SNIPPETS } from "depthbake-three";
 
 /**
- * photospace-three の PhotoSpaceLoader で読み込んだ1パッケージ
+ * depthbake-three の DepthbakeLoader で読み込んだ1パッケージ
  * (photo.avif/depth.png/meta.json)だけを使い、Three.jsのShaderMaterialで
  * カーソル追従の波紋エフェクトを再現する受け入れ検証シーン。
  * meta.jsonのcamera.fovDeg/farRange/sky.thresholdだけでシェーダーが書けることの証明。
@@ -12,8 +12,8 @@ import { PhotoSpaceLoader, GLSL_SNIPPETS } from "photospace-three";
  */
 async function main(): Promise<void> {
   const hint = document.getElementById("hint")!;
-  const asset = await new PhotoSpaceLoader().setNeed(["photo", "depth"]).loadAsync("/sample/source/");
-  hint.textContent = "photospace-three で /sample/source/ を読み込み済み — マウスで波紋エフェクトを操作";
+  const asset = await new DepthbakeLoader().setNeed(["photo", "depth"]).loadAsync("/sample/source/");
+  hint.textContent = "depthbake-three で /sample/source/ を読み込み済み — マウスで波紋エフェクトを操作";
 
   const app = document.getElementById("app")!;
   const aspect = asset.aspect;

@@ -6,9 +6,9 @@ import {
   type SourcePhoto,
   type PhotoFormat,
   type PhotoMimeType,
-  type PhotoSpaceConfig,
+  type DepthbakeConfig,
   type RasterF32,
-} from "photospace-core";
+} from "depthbake-core";
 import { createZip } from "./zip.ts";
 
 export function rasterizeToCanvas(source: CanvasImageSource, width: number, height: number): HTMLCanvasElement {
@@ -49,7 +49,7 @@ interface EncodedPhoto {
   height: number;
 }
 
-function photoQuality(config: PhotoSpaceConfig["photo"], format: PhotoFormat): number {
+function photoQuality(config: DepthbakeConfig["photo"], format: PhotoFormat): number {
   if (format === "avif") return config.avifQuality / 100;
   if (format === "webp") return config.webpQuality / 100;
   return config.jpegQuality / 100;
@@ -57,7 +57,7 @@ function photoQuality(config: PhotoSpaceConfig["photo"], format: PhotoFormat): n
 
 async function encodePhotoSources(
   canvas: HTMLCanvasElement,
-  config: PhotoSpaceConfig["photo"],
+  config: DepthbakeConfig["photo"],
 ): Promise<EncodedPhoto[]> {
   const encoded: EncodedPhoto[] = [];
   // photo.jpgは必須の最終フォールバック。configにjpegがなくても構造的に含める。
@@ -92,7 +92,7 @@ export interface ExportPackageInput {
   /** モデル推論直後の正規化済み(0..1)disparity。推論を再実行せず既存の結果を再利用する */
   lowResDisparity: RasterF32;
   normalization: { min: number; max: number };
-  config: PhotoSpaceConfig;
+  config: DepthbakeConfig;
 }
 
 export interface PackageExportSummary {
@@ -118,7 +118,7 @@ export async function downloadPackage(input: ExportPackageInput): Promise<Packag
   let normalBytes: Uint8Array | undefined;
   let mapBytes: number;
   while (true) {
-    const effectiveConfig: PhotoSpaceConfig = {
+    const effectiveConfig: DepthbakeConfig = {
       ...input.config,
       depth: { ...input.config.depth, maxSize: mapMaxSize },
     };
@@ -164,9 +164,9 @@ export async function downloadPackage(input: ExportPackageInput): Promise<Packag
     { name: "meta.json", data: metaBytes },
   ]);
 
-  const baseName = input.photo.fileName.replace(/\.[^.]+$/, "") || "photospace";
+  const baseName = input.photo.fileName.replace(/\.[^.]+$/, "") || "depthbake";
   const a = document.createElement("a");
-  a.download = `${baseName}.photospace.zip`;
+  a.download = `${baseName}.depthbake.zip`;
   a.href = URL.createObjectURL(zip);
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 0);

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PhotoSpaceLoader, quantileDisparity, worldPositionFromMeta, GLSL_SNIPPETS } from "photospace-three";
+import { DepthbakeLoader, quantileDisparity, worldPositionFromMeta, GLSL_SNIPPETS } from "depthbake-three";
 
 /**
  * relight — 写真をカーソルで照らし直すデモ。
@@ -47,10 +47,10 @@ const DEBUG_HELPER_SIZE = 0.06; // NDC空間でのライトhelperの表示サイ
 async function main(): Promise<void> {
   // ライティングをリニア空間で行うため、色管理はシェーダー内で手動sRGB復元/変換する
   // (setPhotoColorSpaceでNoColorSpaceを指定し、three側の自動変換を止める)
-  const asset = await new PhotoSpaceLoader()
+  const asset = await new DepthbakeLoader()
     .setNeed(["photo", "depth", "mask", "normal"])
     .setPhotoColorSpace(THREE.NoColorSpace)
-    .loadAsync("./bust.photospace/");
+    .loadAsync("./bust.depthbake/");
   if (!asset.normal || !asset.mask) {
     throw new Error("このデモは mask.png / normal.png 同梱パッケージが必要です(bake時に --mask --normal)");
   }

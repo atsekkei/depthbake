@@ -1,6 +1,6 @@
 # Package format (version 2)
 
-The `bake` command of [`photospace-cli`](../packages/cli) writes photo variants and the package files into one directory per photo. The "Package (.zip)" button in the browser demo generates the same format directly with `photospace-core` and bundles it into a zip.
+The `bake` command of [`depthbake-cli`](../packages/cli) writes photo variants and the package files into one directory per photo. The "Package (.zip)" button in the browser demo generates the same format directly with `depthbake-core` and bundles it into a zip.
 
 ```
 out/<name>/
@@ -24,7 +24,7 @@ All included maps share one resolution. `maps.maxBytes` is an encoding-time cons
 ## meta.json
 
 ```ts
-interface PhotoSpaceMeta {
+interface DepthbakeMeta {
   version: 2;
   source: { file: string; width: number; height: number };
   photo?: {
@@ -76,7 +76,7 @@ B = 0
 d16 = round(clamp01(d) * 65535)
 ```
 
-Recovered with `d = (R*256 + G) / 65535`. The GPU's bilinear interpolation cannot be used on this packing (interpolation across R/G breaks), so sampling in a shader requires NEAREST + manual bilinear (see `photospace-runtime`'s `GLSL_SNIPPETS.unpackAndSampleDepth`).
+Recovered with `d = (R*256 + G) / 65535`. The GPU's bilinear interpolation cannot be used on this packing (interpolation across R/G breaks), so sampling in a shader requires NEAREST + manual bilinear (see `depthbake-runtime`'s `GLSL_SNIPPETS.unpackAndSampleDepth`).
 
 ## mask.png (optional)
 
@@ -105,4 +105,4 @@ Version 1 differs from version 2 only in which files are required; the raster en
 
 ## Compatibility policy
 
-`meta.json.version` is bumped only when the format changes in a backward-incompatible way. `photospace-runtime` reads versions 1 and 2 and throws on anything else. Note the inverse does not hold: runtimes ≤0.1.x fetch `mask.png` / `normal.png` unconditionally, so they can only read v2 packages baked with both maps enabled.
+`meta.json.version` is bumped only when the format changes in a backward-incompatible way. `depthbake-runtime` reads versions 1 and 2 and throws on anything else. Note the inverse does not hold: runtimes ≤0.1.x fetch `mask.png` / `normal.png` unconditionally, so they can only read v2 packages baked with both maps enabled.

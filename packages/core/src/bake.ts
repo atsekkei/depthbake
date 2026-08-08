@@ -3,7 +3,7 @@ import { normalizeDisparity } from "./normalize.ts";
 import { guidedUpsampleDepth, type RasterF32 } from "./upsample.ts";
 import { computeSkyMask, computeEdgeMask } from "./masks.ts";
 import { computeNormals } from "./normals.ts";
-import { packDepthRG16, packMask, packNormal, computeSourceHash, type PhotoSpaceConfig, type PhotoSpaceMeta } from "./pack.ts";
+import { packDepthRG16, packMask, packNormal, computeSourceHash, type DepthbakeConfig, type DepthbakeMeta } from "./pack.ts";
 
 export interface SourcePhoto {
   /** パッケージ名やmeta.jsonのsource.fileに使うファイル名 */
@@ -19,7 +19,7 @@ export interface SourcePhoto {
 }
 
 export interface BakedPackage {
-  meta: PhotoSpaceMeta;
+  meta: DepthbakeMeta;
   /** RG16パック済み深度 (RGBA raster, depth.width x depth.height) */
   depthRgba: Uint8ClampedArray<ArrayBuffer>;
   /** R=空マスク, G=エッジマスク (RGBA raster, depth解像度)。config.maps.mask有効時のみ */
@@ -32,12 +32,12 @@ export interface BakedPackage {
 
 export interface BakeOptions {
   model: DepthModel;
-  config: PhotoSpaceConfig;
+  config: DepthbakeConfig;
   guidedFilter?: { radius?: number; eps?: number };
 }
 
 export interface BakeFromDisparityOptions {
-  config: PhotoSpaceConfig;
+  config: DepthbakeConfig;
   guidedFilter?: { radius?: number; eps?: number };
   /**
    * 計算済みのsourceHash(computeSourceHashの結果)。容量キャップ超過時の再試行のように
@@ -95,7 +95,7 @@ export async function bakeFromDisparity(
 
   const sourceHash = opts.sourceHash ?? (await computeSourceHash(photo.bytes, config));
 
-  const meta: PhotoSpaceMeta = {
+  const meta: DepthbakeMeta = {
     version: 2,
     source: { file: photo.fileName, width: photo.width, height: photo.height },
     depth: {

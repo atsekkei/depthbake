@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { PhotoSpaceLoader, PhotoSpaceCamera, worldPositionFromMeta } from "photospace-three";
-import type { PartialPhotoSpacePackage } from "photospace-three";
+import { DepthbakeLoader, DepthbakeCamera, worldPositionFromMeta } from "depthbake-three";
+import type { PartialDepthbakePackage } from "depthbake-three";
 
 /**
  * README冒頭の動画用ヒーローデモ。
@@ -81,9 +81,9 @@ interface ParticleCloud {
 
 /**
  * 写真を重要度サンプリングして深度配置済みのパーティクル群を作る。
- * photo/depthはPhotoSpaceLoaderのsetNeedで要求済みなので必ず存在する
+ * photo/depthはDepthbakeLoaderのsetNeedで要求済みなので必ず存在する
  */
-function buildParticles(pkg: PartialPhotoSpacePackage): ParticleCloud {
+function buildParticles(pkg: PartialDepthbakePackage): ParticleCloud {
   const rng = mulberry32(0x9e3779b9);
   const { meta } = pkg;
   const photo = pkg.photo!;
@@ -222,14 +222,14 @@ function buildParticles(pkg: PartialPhotoSpacePackage): ParticleCloud {
 
 async function main(): Promise<void> {
   // skyMask/edgeMaskの導出にmaskが要る。normal.pngはbuildParticlesが使わないので外す
-  const asset = await new PhotoSpaceLoader().setNeed(["photo", "depth", "mask"]).loadAsync("./maiko.photospace/");
+  const asset = await new DepthbakeLoader().setNeed(["photo", "depth", "mask"]).loadAsync("./maiko.depthbake/");
 
   const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true });
   renderer.setClearColor(0x050607, 1);
   document.getElementById("app")!.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new PhotoSpaceCamera(asset, { frameZoom: FRAME_ZOOM, pivotQuantile: PIVOT_QUANTILE });
+  const camera = new DepthbakeCamera(asset, { frameZoom: FRAME_ZOOM, pivotQuantile: PIVOT_QUANTILE });
 
   const { geometry, count } = buildParticles(asset.package);
   console.info(`[depth-splats] ${count.toLocaleString()} points, pivotZ=${camera.pivotZ.toFixed(2)}`);

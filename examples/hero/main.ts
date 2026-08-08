@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PhotoSpaceLoader, PhotoSpaceCamera, GLSL_SNIPPETS } from "photospace-three";
+import { DepthbakeLoader, DepthbakeCamera, GLSL_SNIPPETS } from "depthbake-three";
 
 /**
  * examples/hero — コピペ用の最小テンプレート。
@@ -11,7 +11,7 @@ import { PhotoSpaceLoader, PhotoSpaceCamera, GLSL_SNIPPETS } from "photospace-th
  * 2. prefers-reduced-motion では自動軌道だけ止め、ポインタへの追従は残す。
  *    ユーザー操作への応答を止めるのはアクセシビリティ上望ましくない
  *
- * PhotoSpaceMeshのようなコンポーネントとして固めず、コピペ前提のテンプレートとして
+ * DepthbakeMeshのようなコンポーネントとして固めず、コピペ前提のテンプレートとして
  * 出しているのは改造されることが前提だから。シェーダーもモーションも
  * 手元のプロジェクトに合わせて書き換えてよい。
  */
@@ -26,13 +26,13 @@ const PARALLAX_X = 0.1; // カメラ振幅(注視深度pivotZに対する比)
 const PARALLAX_Y = 0.055;
 
 async function main(): Promise<void> {
-  const asset = await new PhotoSpaceLoader().setNeed(["photo", "depth"]).loadAsync("./maiko.photospace/");
+  const asset = await new DepthbakeLoader().setNeed(["photo", "depth"]).loadAsync("./maiko.depthbake/");
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   document.getElementById("app")!.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new PhotoSpaceCamera(asset);
+  const camera = new DepthbakeCamera(asset);
 
   // depthから頂点位置を復元するメッシュ。PlaneGeometryのposition属性自体は使わず、
   // uv+depthから毎頂点wpos()でワールド座標を計算し直す(uv/indexの供給元として使う)

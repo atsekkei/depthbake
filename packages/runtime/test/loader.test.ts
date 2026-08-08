@@ -6,11 +6,11 @@ import {
   computeSkyMask,
   packageMapFiles,
   photoFileCandidates,
-  type PhotoSpaceMeta,
-  type PhotoSpaceMetaV2,
+  type DepthbakeMeta,
+  type DepthbakeMetaV2,
 } from "../loader.ts";
 
-function meta(photo?: PhotoSpaceMeta["photo"]): PhotoSpaceMeta {
+function meta(photo?: DepthbakeMeta["photo"]): DepthbakeMeta {
   return {
     version: 1,
     source: { file: "source.jpg", width: 1, height: 1 },
@@ -30,7 +30,7 @@ function meta(photo?: PhotoSpaceMeta["photo"]): PhotoSpaceMeta {
   };
 }
 
-function metaV2(fields?: Partial<PhotoSpaceMetaV2>): PhotoSpaceMetaV2 {
+function metaV2(fields?: Partial<DepthbakeMetaV2>): DepthbakeMetaV2 {
   return { ...meta(), ...fields, version: 2 };
 }
 
@@ -81,7 +81,7 @@ test("packageMapFiles returns only the maps declared by v2 meta", () => {
 });
 
 test("packageMapFiles rejects unsupported versions", () => {
-  assert.throws(() => packageMapFiles({ ...meta(), version: 3 } as unknown as PhotoSpaceMeta), /version/);
+  assert.throws(() => packageMapFiles({ ...meta(), version: 3 } as unknown as DepthbakeMeta), /version/);
 });
 
 // mask.png/normal.png非同梱パッケージ向けの実行時導出(coreの焼き込みと同一実装)

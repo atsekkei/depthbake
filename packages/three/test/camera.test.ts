@@ -3,15 +3,15 @@ import assert from "node:assert/strict";
 import {
   coverFitTanHalf,
   quantileDisparity,
-  PhotoSpaceCamera,
-  type PhotoSpaceAsset,
+  DepthbakeCamera,
+  type DepthbakeAsset,
 } from "../index.ts";
-import type { PhotoSpaceMeta, PartialPhotoSpacePackage } from "photospace-runtime";
+import type { DepthbakeMeta, PartialDepthbakePackage } from "depthbake-runtime";
 
 const FOV_DEG = 55;
 const FAR_RANGE = 12;
 
-function meta(width = 1600, height = 1000): PhotoSpaceMeta {
+function meta(width = 1600, height = 1000): DepthbakeMeta {
   return {
     version: 2,
     source: { file: "source.jpg", width, height },
@@ -30,14 +30,14 @@ function meta(width = 1600, height = 1000): PhotoSpaceMeta {
   };
 }
 
-/** テクスチャを作らずに PhotoSpaceCamera だけを検証するための最小アセット */
-function fakeAsset(depth?: Float32Array, width = 1600, height = 1000): PhotoSpaceAsset {
+/** テクスチャを作らずに DepthbakeCamera だけを検証するための最小アセット */
+function fakeAsset(depth?: Float32Array, width = 1600, height = 1000): DepthbakeAsset {
   const m = meta(width, height);
   return {
     meta: m,
     aspect: width / height,
-    uniforms: undefined as unknown as PhotoSpaceAsset["uniforms"],
-    package: { meta: m, depth, depthWidth: 4, depthHeight: 4 } as PartialPhotoSpacePackage,
+    uniforms: undefined as unknown as DepthbakeAsset["uniforms"],
+    package: { meta: m, depth, depthWidth: 4, depthHeight: 4 } as PartialDepthbakePackage,
     dispose() {},
   };
 }
@@ -87,14 +87,14 @@ test("quantileDisparity: 境界の分位でも範囲外アクセスしない", (
   assert.equal(quantileDisparity(depth, 1), f32(0.2));
 });
 
-test("PhotoSpaceCamera: 初期FOVはmeta.camera.fovDeg", () => {
-  const camera = new PhotoSpaceCamera(fakeAsset());
+test("DepthbakeCamera: 初期FOVはmeta.camera.fovDeg", () => {
+  const camera = new DepthbakeCamera(fakeAsset());
   assert.equal(camera.fov, FOV_DEG);
   assert.equal(camera.aspect, 1.6);
 });
 
-test("PhotoSpaceCamera: setSizeでcover-fitのFOVとアスペクトになる", () => {
-  const camera = new PhotoSpaceCamera(fakeAsset(), { frameZoom: 1 });
+test("DepthbakeCamera: setSizeでcover-fitのFOVとアスペクトになる", () => {
+  const camera = new DepthbakeCamera(fakeAsset(), { frameZoom: 1 });
   camera.setSize(2000, 1000); // ビュー20:10 は写真16:10より横長
   assert.equal(camera.aspect, 2);
   const expected = (Math.atan(coverFitTanHalf(Math.tan((FOV_DEG * Math.PI) / 360), 1.6, 2, 1)) * 360) / Math.PI;
@@ -102,10 +102,10 @@ test("PhotoSpaceCamera: setSizeでcover-fitのFOVとアスペクトになる", (
   assert.ok(camera.fov < FOV_DEG);
 });
 
-test("PhotoSpaceCamera: pivotZは注視深度をワールド距離で返し、キャッシュされる", () => {
+test("DepthbakeCamera: pivotZは注視深度をワールド距離で返し、キャッシュされる", () => {
   const depth = Float32Array.from([0, 0.25, 0.5, 0.75]);
   const asset = fakeAsset(depth);
-  const camera = new PhotoSpaceCamera(asset, { pivotQuantile: 0.1 });
+  const camera = new DepthbakeCamera(asset, { pivotQuantile: 0.1 });
 
   // quantile=0.1 → index floor(4*0.9)=3 → 視差0.75
   // z = 1 / mix(1/far, 1, d)
@@ -118,7 +118,7 @@ test("PhotoSpaceCamera: pivotZは注視深度をワールド距離で返し、�
   assert.ok(Math.abs(camera.pivotZ - expected) < 1e-6);
 });
 
-test("PhotoSpaceCamera: depth未ロードならpivotZは理由の分かるエラーを投げる", () => {
-  const camera = new PhotoSpaceCamera(fakeAsset(undefined));
+test("DepthbakeCamera: depth未ロードならpivotZは理由の分かるエラーを投げる", () => {
+  const camera = new DepthbakeCamera(fakeAsset(undefined));
   assert.throws(() => camera.pivotZ, /depth/);
 });

@@ -1,8 +1,8 @@
 {
-  "name": "photospace-core",
+  "name": "depthbake-core",
   "private": true,
-  "version": "0.2.0",
-  "description": "Photospace の推論・正規化・アップサンプリング・パッキングの共有ロジック(viewer/CLI 双方から利用、非公開ワークスペース内部パッケージ)",
+  "version": "1.0.0",
+  "description": "Depthbake の推論・正規化・アップサンプリング・パッキングの共有ロジック(viewer/CLI 双方から利用、非公開ワークスペース内部パッケージ)",
   "type": "module",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
-    "photospace-runtime": "workspace:*"
+    "depthbake-runtime": "workspace:*"
   }
 }

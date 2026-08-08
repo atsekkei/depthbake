@@ -1,21 +1,21 @@
-# photospace-runtime
+# depthbake-runtime
 
-[![npm](https://img.shields.io/npm/v/photospace-runtime)](https://www.npmjs.com/package/photospace-runtime)
+[![npm](https://img.shields.io/npm/v/depthbake-runtime)](https://www.npmjs.com/package/depthbake-runtime)
 
-A lightweight runtime for using Photospace packages in creative web projects.
+A lightweight runtime for using Depthbake packages in creative web projects.
 
-It reads a package baked by [`photospace-cli`](https://github.com/atsekkei/photospace/tree/main/packages/cli), selects a decodable AVIF/WebP/JPEG photo candidate, exposes GPU-ready depth/mask/normal bitmaps, and provides helpers for recovering world-space positions. It is renderer-agnostic, so it works with three.js, raw WebGL, Canvas2D, or custom shaders.
+It reads a package baked by [`depthbake-cli`](https://github.com/atsekkei/depthbake/tree/main/packages/cli), selects a decodable AVIF/WebP/JPEG photo candidate, exposes GPU-ready depth/mask/normal bitmaps, and provides helpers for recovering world-space positions. It is renderer-agnostic, so it works with three.js, raw WebGL, Canvas2D, or custom shaders.
 
 ## Install
 
 ```bash
-npm install photospace-runtime
+npm install depthbake-runtime
 ```
 
 ## Usage
 
 ```ts
-import { loadPackage, worldPositionFromMeta } from "photospace-runtime";
+import { loadPackage, worldPositionFromMeta } from "depthbake-runtime";
 
 const pkg = await loadPackage("/sample/source/");
 // pkg.photo:       ImageBitmap
@@ -38,9 +38,9 @@ The decoded PNGs are exposed as `ImageBitmap`s (`depthBitmap` / `maskBitmap` / `
 
 To wire it directly into your own shader, use `GLSL_SNIPPETS.unpackAndSampleDepthRgba8` (direct RGBA8 upload) or `GLSL_SNIPPETS.unpackAndSampleDepth` (Float32 `DataTexture` from `pkg.depth`), plus `GLSL_SNIPPETS.worldPosition`. Because the RG16 packing cannot use the GPU's bilinear interpolation, both sample with NEAREST plus manual bilinear filtering.
 
-See [`examples/three-scene`](https://github.com/atsekkei/photospace/tree/main/examples/three-scene) for a three.js implementation.
+See [`examples/three-scene`](https://github.com/atsekkei/depthbake/tree/main/examples/three-scene) for a three.js implementation.
 
-> **Browser-only.** The loader relies on `fetch`, `createImageBitmap`, and `OffscreenCanvas`, so it runs in the browser (or a Worker), not in Node. To bake packages from Node, use [`photospace-cli`](https://github.com/atsekkei/photospace/tree/main/packages/cli).
+> **Browser-only.** The loader relies on `fetch`, `createImageBitmap`, and `OffscreenCanvas`, so it runs in the browser (or a Worker), not in Node. To bake packages from Node, use [`depthbake-cli`](https://github.com/atsekkei/depthbake/tree/main/packages/cli).
 
 ## API
 
@@ -50,7 +50,7 @@ Full type definitions ship in `dist/loader.d.ts`; this is a summary of the publi
 
 Fetches and decodes the package under `baseUrl`. A trailing `/` is added to `baseUrl` if missing, and it is resolved against `location.href`, so both relative (`"/sample/source/"`) and absolute URLs work.
 
-Without `options` it returns a `PhotoSpacePackage` (`photo` / `depthBitmap` / `depth` guaranteed). With `options.need` it returns a `PartialPhotoSpacePackage` where skipped components are `undefined`:
+Without `options` it returns a `DepthbakePackage` (`photo` / `depthBitmap` / `depth` guaranteed). With `options.need` it returns a `PartialDepthbakePackage` where skipped components are `undefined`:
 
 ```ts
 type PackageComponent = "photo" | "depth" | "mask" | "normal";
@@ -59,8 +59,8 @@ interface LoadPackageOptions {
   need?: readonly PackageComponent[]; // default: everything bundled (backward compatible)
 }
 
-interface PartialPhotoSpacePackage {
-  meta: PhotoSpaceMeta;              // parsed meta.json (version 1 or 2)
+interface PartialDepthbakePackage {
+  meta: DepthbakeMeta;              // parsed meta.json (version 1 or 2)
   photo?: ImageBitmap;               // decoded photo, ready as a texture source
   depthBitmap?: ImageBitmap;         // decoded depth.png (still RG16-packed RGBA8) for direct GPU upload
   readonly depth?: Float32Array;     // disparity 0..1 (1 = near); lazy CPU unpack, cached
@@ -73,7 +73,7 @@ interface PartialPhotoSpacePackage {
   readonly normal?: { nx: Float32Array; ny: Float32Array; nz: Float32Array }; // each -1..1; lazy
 }
 
-interface PhotoSpacePackage extends PartialPhotoSpacePackage {
+interface DepthbakePackage extends PartialDepthbakePackage {
   photo: ImageBitmap;
   depthBitmap: ImageBitmap;
   readonly depth: Float32Array;
@@ -87,7 +87,7 @@ interface PhotoSpacePackage extends PartialPhotoSpacePackage {
 `mask.png` / `normal.png` are baked purely from depth + camera meta, so packages can ship without them (smaller downloads, and under a `maps.maxBytes` cap the freed budget raises the depth resolution). The same functions the CLI bakes with are exported here:
 
 ```ts
-import { computeSkyMask, computeEdgeMask, computeNormals } from "photospace-runtime";
+import { computeSkyMask, computeEdgeMask, computeNormals } from "depthbake-runtime";
 
 const depth = { width: pkg.depthWidth, height: pkg.depthHeight, data: pkg.depth };
 const sky = computeSkyMask(depth, pkg.meta.sky.threshold); // sky mask as the CLI bakes it
@@ -123,11 +123,11 @@ vec3 n = nrm(p);
 
 ### Types
 
-`PhotoSpaceMeta`, `PhotoSpacePackage`, `PartialPhotoSpacePackage`, `LoadPackageOptions`, `PackageComponent`, `RasterF32`, and `NormalRaster` are exported for TypeScript consumers. `PhotoSpaceMeta` mirrors `meta.json` — see [`docs/package-format.md`](https://github.com/atsekkei/photospace/blob/main/docs/package-format.md) for the field-by-field spec.
+`DepthbakeMeta`, `DepthbakePackage`, `PartialDepthbakePackage`, `LoadPackageOptions`, `PackageComponent`, `RasterF32`, and `NormalRaster` are exported for TypeScript consumers. `DepthbakeMeta` mirrors `meta.json` — see [`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) for the field-by-field spec.
 
 ## Package format
 
-[`docs/package-format.md`](https://github.com/atsekkei/photospace/blob/main/docs/package-format.md) documents the fields in detail along with the compatibility policy. The `version` field in `meta.json` guards against future format changes; this loader reads versions 1 and 2 and throws on anything else.
+[`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) documents the fields in detail along with the compatibility policy. The `version` field in `meta.json` guards against future format changes; this loader reads versions 1 and 2 and throws on anything else.
 
 > **Breaking change in 0.2.0:** `skyMask`, `edgeMask`, and `normal` are now optional — version 2 packages bundle `mask.png` / `normal.png` only when baked with them enabled. Runtimes ≤0.1.x cannot read v2 packages baked without both maps.
 
@@ -137,7 +137,7 @@ vec3 n = nrm(p);
 
 ```bash
 pnpm install
-pnpm --filter photospace-runtime build
+pnpm --filter depthbake-runtime build
 ```
 
 This builds `loader.ts` into `dist/loader.js` (ESM) + `dist/loader.d.ts`.

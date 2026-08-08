@@ -1,13 +1,13 @@
-# photospace-three
+# depthbake-three
 
-three.js loader for [Photospace](https://github.com/atsekkei/photospace) depth-aware creative web assets.
+three.js loader for [Depthbake](https://github.com/atsekkei/depthbake) depth-aware creative web assets.
 
-It turns a baked Photospace package into three.js textures and a matching uniform bundle, so you can write your own shader instead of re-deriving the texture setup on every project. It deliberately does **not** ship a default effect, a motion system, or input binders — those belong to your project.
+It turns a baked Depthbake package into three.js textures and a matching uniform bundle, so you can write your own shader instead of re-deriving the texture setup on every project. It deliberately does **not** ship a default effect, a motion system, or input binders — those belong to your project.
 
 ## Install
 
 ```bash
-npm install photospace-three three
+npm install depthbake-three three
 ```
 
 `three` is a peer dependency (>=0.152).
@@ -16,9 +16,9 @@ npm install photospace-three three
 
 ```ts
 import * as THREE from "three";
-import { PhotoSpaceLoader, GLSL_SNIPPETS } from "photospace-three";
+import { DepthbakeLoader, GLSL_SNIPPETS } from "depthbake-three";
 
-const asset = await new PhotoSpaceLoader().setNeed(["photo", "depth"]).loadAsync("/out/hero/");
+const asset = await new DepthbakeLoader().setNeed(["photo", "depth"]).loadAsync("/out/hero/");
 
 const material = new THREE.ShaderMaterial({
   uniforms: asset.uniforms,
@@ -51,11 +51,11 @@ const material = new THREE.ShaderMaterial({
 });
 ```
 
-`PhotoSpaceLoader` extends `THREE.Loader`, so it follows the same conventions as `GLTFLoader` and works with `THREE.LoadingManager`:
+`DepthbakeLoader` extends `THREE.Loader`, so it follows the same conventions as `GLTFLoader` and works with `THREE.LoadingManager`:
 
 ```ts
 const manager = new THREE.LoadingManager(onLoad, onProgress);
-const asset = await new PhotoSpaceLoader(manager).loadAsync("/out/hero/");
+const asset = await new DepthbakeLoader(manager).loadAsync("/out/hero/");
 ```
 
 ## What the loader handles for you
@@ -85,15 +85,15 @@ If you would rather work in encoded space and do the conversion yourself (as `ex
 
 ## Animating with GSAP / ScrollTrigger
 
-`photospace-three` doesn't own a "motion" object, so there's no vocabulary to fight GSAP over — tween whatever plain object you already have, and read it back wherever you drive the camera or uniforms:
+`depthbake-three` doesn't own a "motion" object, so there's no vocabulary to fight GSAP over — tween whatever plain object you already have, and read it back wherever you drive the camera or uniforms:
 
 ```ts
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
-const asset = await new PhotoSpaceLoader().loadAsync("/out/hero/");
-const camera = new PhotoSpaceCamera(asset);
+const asset = await new DepthbakeLoader().loadAsync("/out/hero/");
+const camera = new DepthbakeCamera(asset);
 
 const scroll = { progress: 0 };
 gsap.to(scroll, {
@@ -112,11 +112,11 @@ function render() {
 }
 ```
 
-The same pattern applies to `asset.uniforms` — e.g. `gsap.to(asset.uniforms.uFar, { value: ..., scrollTrigger: {...} })` to scrub the depth range a shader reads. There's nothing `photospace-three`-specific about the GSAP side; it's a plain object and a `THREE.PerspectiveCamera`.
+The same pattern applies to `asset.uniforms` — e.g. `gsap.to(asset.uniforms.uFar, { value: ..., scrollTrigger: {...} })` to scrub the depth range a shader reads. There's nothing `depthbake-three`-specific about the GSAP side; it's a plain object and a `THREE.PerspectiveCamera`.
 
 ## API
 
-### `PhotoSpaceLoader`
+### `DepthbakeLoader`
 
 | Method | Description |
 | --- | --- |
@@ -130,26 +130,26 @@ The same pattern applies to `asset.uniforms` — e.g. `gsap.to(asset.uniforms.uF
 
 ### Painting before the depth map arrives
 
-A depth map is routinely 5–15× the size of the photo, so waiting for the whole package before drawing anything costs you LCP on a hero image. Load in stages instead — `loadPackageStaged` is re-exported from `photospace-runtime`:
+A depth map is routinely 5–15× the size of the photo, so waiting for the whole package before drawing anything costs you LCP on a hero image. Load in stages instead — `loadPackageStaged` is re-exported from `depthbake-runtime`:
 
 ```ts
-import { loadPackageStaged } from "photospace-three";
+import { loadPackageStaged } from "depthbake-three";
 
 const staged = loadPackageStaged("/out/hero/");
 showStillImage(await staged.photo); // paint now
 const asset = await staged.ready;   // upgrade to interactive when depth lands
 ```
 
-The resolved `PhotoSpaceAsset` has `photo` / `depth` / `mask` / `normal` textures (undefined when not bundled or excluded by `setNeed`), `meta`, `aspect`, `uniforms`, `dispose()`, and `package` — the underlying `photospace-runtime` package, which lazily exposes CPU-side `Float32Array` data when you need it.
+The resolved `DepthbakeAsset` has `photo` / `depth` / `mask` / `normal` textures (undefined when not bundled or excluded by `setNeed`), `meta`, `aspect`, `uniforms`, `dispose()`, and `package` — the underlying `depthbake-runtime` package, which lazily exposes CPU-side `Float32Array` data when you need it.
 
 `dispose()` disposes the textures. Like `THREE.Texture.dispose()`, it does not close the source `ImageBitmap`s, so `asset.package`'s lazy fields stay usable.
 
-### `PhotoSpaceCamera`
+### `DepthbakeCamera`
 
 A `THREE.PerspectiveCamera` whose FOV comes from `meta.camera.fovDeg`.
 
 ```ts
-const camera = new PhotoSpaceCamera(asset);
+const camera = new DepthbakeCamera(asset);
 camera.setSize(window.innerWidth, window.innerHeight); // cover fit
 camera.position.set(x * 0.1 * camera.pivotZ, y * 0.055 * camera.pivotZ, 0);
 camera.lookAt(0, 0, -camera.pivotZ);
@@ -160,7 +160,7 @@ camera.lookAt(0, 0, -camera.pivotZ);
 
 ### Re-exports
 
-`GLSL_SNIPPETS`, `worldPosition`, `worldPositionFromMeta`, `computeSkyMask`, `computeEdgeMask`, and `computeNormals` are re-exported from `photospace-runtime` so you don't have to import from two packages.
+`GLSL_SNIPPETS`, `worldPosition`, `worldPositionFromMeta`, `computeSkyMask`, `computeEdgeMask`, and `computeNormals` are re-exported from `depthbake-runtime` so you don't have to import from two packages.
 
 ## License
 

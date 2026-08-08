@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { formatInspectionHuman, inspectPackage, validatePackages } from "../src/package.ts";
 
 async function writeTestPackage(options: { stale?: boolean; omitDepth?: boolean } = {}): Promise<string> {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-package-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-package-"));
   const photo = await sharp({
     create: { width: 4, height: 2, channels: 3, background: { r: 20, g: 40, b: 60 } },
   })
@@ -80,7 +80,7 @@ test("validatePackages reports missing declared files and stale artifacts", asyn
 });
 
 test("validatePackages returns an invalid result for missing package directories", async () => {
-  const dir = path.join(tmpdir(), "photospace-package-does-not-exist");
+  const dir = path.join(tmpdir(), "depthbake-package-does-not-exist");
   const [result] = await validatePackages([dir]);
 
   assert.equal(result.valid, false);

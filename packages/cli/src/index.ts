@@ -4,13 +4,13 @@ import { runBake } from "./bake.ts";
 import { formatInspectionHuman, inspectPackage, validatePackages } from "./package.ts";
 
 const program = new Command();
-program.name("photospace").description("Photospace CLI — 深度推定パッケージの一括ベイク");
+program.name("depthbake").description("Depthbake CLI — 深度推定パッケージの一括ベイク");
 
 program
   .command("bake")
   .description("写真候補とdepth.png/meta.json(+オプションのmask/normal)を含むパッケージを一括生成する")
   .argument("<patterns...>", "入力画像のパス・globパターン・ディレクトリ")
-  .option("--config <path>", "photospace.config.json のパス")
+  .option("--config <path>", "depthbake.config.json のパス")
   .option("--out <dir>", "出力先ディレクトリ", "out")
   .option("--mask", "mask.png(空マスク+エッジマスク)を同梱する")
   .option("--normal", "normal.png(ワールド法線)を同梱する")
@@ -28,7 +28,7 @@ program
 
 program
   .command("validate")
-  .description("Photospace package のファイルとmeta.json整合性を検証する")
+  .description("Depthbake package のファイルとmeta.json整合性を検証する")
   .argument("<packages...>", "検証する package directory")
   .option("--max-bytes <bytes>", "package size budget", (value) => Number.parseInt(value, 10))
   .option("--json", "機械可読JSONだけをstdoutへ出力する")
@@ -48,7 +48,7 @@ program
 
 program
   .command("inspect")
-  .description("Photospace package の要約を表示する")
+  .description("Depthbake package の要約を表示する")
   .argument("<package>", "inspectする package directory")
   .option("--json", "機械可読JSONだけをstdoutへ出力する")
   .action(async (packagePath: string, options: { json?: boolean }) => {

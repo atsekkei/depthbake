@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadPackage, loadPackageStaged } from "../loader.ts";
-import type { PhotoSpaceMeta } from "../loader.ts";
+import type { DepthbakeMeta } from "../loader.ts";
 
 /**
  * 段階ロードの検証。ブラウザAPI(location / createImageBitmap / Response)を
  * 差し替えて、fetchの順序・中断・未awaitのrejection処理だけを見る。
  */
 
-const META: PhotoSpaceMeta = {
+const META: DepthbakeMeta = {
   version: 2,
   source: { file: "photo.jpg", width: 960, height: 640 },
   photo: { file: "photo.jpg", sources: [{ file: "photo.jpg", type: "image/jpeg" }] },

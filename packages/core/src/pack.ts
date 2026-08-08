@@ -1,6 +1,6 @@
 import type { ModelDtype } from "./depth.ts";
 
-export interface PhotoSpaceMeta {
+export interface DepthbakeMeta {
   version: 2;
   source: { file: string; width: number; height: number };
   /**
@@ -37,7 +37,7 @@ export interface PhotoSpaceMeta {
 export type PhotoFormat = "avif" | "webp" | "jpeg";
 export type PhotoMimeType = "image/avif" | "image/webp" | "image/jpeg";
 
-export interface PhotoSpaceConfig {
+export interface DepthbakeConfig {
   version: 1;
   camera: { fovDeg: number; farRange: number };
   sky: { threshold: number };
@@ -58,7 +58,7 @@ export interface PhotoSpaceConfig {
   };
 }
 
-export const DEFAULT_CONFIG: PhotoSpaceConfig = {
+export const DEFAULT_CONFIG: DepthbakeConfig = {
   version: 1,
   camera: { fovDeg: 55, farRange: 12 },
   sky: { threshold: 0.03 },
@@ -129,7 +129,7 @@ function clamp01(v: number): number {
 /** sha256(photoBytes + configJson) を16進文字列で返す。CLIの再実行スキップ判定に使う */
 export async function computeSourceHash(
   photoBytes: Uint8Array,
-  config: PhotoSpaceConfig,
+  config: DepthbakeConfig,
   cryptoImpl: { subtle: SubtleCrypto } = crypto,
 ): Promise<string> {
   const configBytes = new TextEncoder().encode(JSON.stringify(config));

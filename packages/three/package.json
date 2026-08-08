@@ -1,15 +1,21 @@
 {
-  "name": "photospace-three",
-  "version": "0.1.0",
-  "description": "three.js loader for Photospace depth-aware creative web assets.",
+  "name": "depthbake-three",
+  "version": "1.0.0",
+  "description": "three.js loader for Depthbake depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atsekkei/photospace.git",
+    "url": "https://github.com/atsekkei/depthbake.git",
     "directory": "packages/three"
   },
-  "keywords": ["photo-space", "depth", "webgl", "three.js", "loader"],
+  "keywords": [
+    "depthbake",
+    "depth",
+    "webgl",
+    "three.js",
+    "loader"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,14 +33,14 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format esm --out-dir dist --clean --external three --external photospace-runtime && tsc -p tsconfig.json --outDir dist",
+    "build": "tsup index.ts --format esm --out-dir dist --clean --external three --external depthbake-runtime && tsc -p tsconfig.json --outDir dist",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "three": ">=0.152.0"
   },
   "dependencies": {
-    "photospace-runtime": "workspace:*"
+    "depthbake-runtime": "workspace:*"
   },
   "devDependencies": {
     "@types/three": "^0.185.1",

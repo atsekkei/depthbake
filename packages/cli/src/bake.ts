@@ -10,13 +10,13 @@ import {
   MODEL_DTYPES,
   computeSourceHash,
   nextMapMaxSize,
-  type PhotoSpaceConfig,
+  type DepthbakeConfig,
   type PhotoFormat,
   type ModelDtype,
   type DepthModel,
   type BakedPackage,
   type SourcePhoto,
-} from "photospace-core";
+} from "depthbake-core";
 import {
   encodeMaps,
   encodePhotoSources,
@@ -107,7 +107,7 @@ function validateOptionalBoolean(section: ConfigRecord | undefined, pathName: st
   }
 }
 
-export function validateConfigSchema(raw: unknown): asserts raw is Partial<PhotoSpaceConfig> {
+export function validateConfigSchema(raw: unknown): asserts raw is Partial<DepthbakeConfig> {
   if (!isConfigRecord(raw)) configError("config", raw, "オブジェクトで指定してください");
   assertKnownKeys(raw, "", ["version", "camera", "sky", "depth", "model", "maps", "photo"]);
 
@@ -154,11 +154,11 @@ export function validateConfigSchema(raw: unknown): asserts raw is Partial<Photo
   }
 }
 
-export async function loadConfig(configPath?: string, overrides: ConfigOverrides = {}): Promise<PhotoSpaceConfig> {
+export async function loadConfig(configPath?: string, overrides: ConfigOverrides = {}): Promise<DepthbakeConfig> {
   const raw: unknown = configPath ? JSON.parse(await readFile(configPath, "utf-8")) : {};
   validateConfigSchema(raw);
   const formats = raw.photo?.formats ?? DEFAULT_CONFIG.photo.formats;
-  const config: PhotoSpaceConfig = {
+  const config: DepthbakeConfig = {
     ...DEFAULT_CONFIG,
     ...raw,
     camera: { ...DEFAULT_CONFIG.camera, ...raw.camera },
@@ -256,7 +256,7 @@ function formatOutputCollisions(collisions: Map<string, ResolvedInput[]>): strin
 }
 
 /** 入力1枚の読み込み・スキップ判定・デコード。前の写真の推論と重ねて先読みできるよう独立させている */
-async function prepareInput(input: ResolvedInput, config: PhotoSpaceConfig, force = false): Promise<PreparedInput> {
+async function prepareInput(input: ResolvedInput, config: DepthbakeConfig, force = false): Promise<PreparedInput> {
   const { file, baseName, outDir } = input;
   try {
     const photoBytes = await readFile(file);
@@ -280,7 +280,7 @@ async function prepareInput(input: ResolvedInput, config: PhotoSpaceConfig, forc
 async function bakeWithSizeLimit(
   model: DepthModel,
   photo: SourcePhoto,
-  config: PhotoSpaceConfig,
+  config: DepthbakeConfig,
   sourceHash: string,
 ): Promise<{ baked: BakedPackage; maps: EncodedMaps }> {
   const result = await estimateDepth(model, photo.input);
@@ -289,7 +289,7 @@ async function bakeWithSizeLimit(
 
   let mapMaxSize = config.depth.maxSize;
   while (true) {
-    const effectiveConfig: PhotoSpaceConfig = {
+    const effectiveConfig: DepthbakeConfig = {
       ...config,
       depth: { ...config.depth, maxSize: mapMaxSize },
     };
@@ -319,7 +319,7 @@ async function finalizePackage(
   prepared: { photo: SourcePhoto; outDir: string },
   baked: BakedPackage,
   maps: EncodedMaps,
-  config: PhotoSpaceConfig,
+  config: DepthbakeConfig,
 ): Promise<void> {
   const photoSources = await encodePhotoSources(prepared.photo.bytes, config.photo);
   const firstPhoto = photoSources[0];
@@ -339,7 +339,7 @@ async function finalizePackage(
 }
 
 /**
- * `photospace bake` の本体。推論は1枚ずつ直列だが、次の写真の読み込み・デコード(先読み1枚)と
+ * `depthbake bake` の本体。推論は1枚ずつ直列だが、次の写真の読み込み・デコード(先読み1枚)と
  * 前の写真のエンコード・書き出し(後段1枚)を推論とオーバーラップさせる小さなパイプラインで回す。
  * 1枚失敗しても他ファイルの処理は継続する。
  */

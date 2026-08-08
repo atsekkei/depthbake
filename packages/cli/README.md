@@ -1,34 +1,34 @@
-# photospace-cli
+# depthbake-cli
 
-[![npm](https://img.shields.io/npm/v/photospace-cli)](https://www.npmjs.com/package/photospace-cli)
+[![npm](https://img.shields.io/npm/v/depthbake-cli)](https://www.npmjs.com/package/depthbake-cli)
 
-A local-first batch baker for Photospace packages.
+A local-first batch baker for Depthbake packages.
 
-It turns photos into portable, depth-aware assets for creative web runtimes: AVIF/WebP/JPEG photo variants plus `depth.png` / `meta.json` and optional `mask.png` / `normal.png`. It runs monocular depth estimation ([Depth Anything V2](https://huggingface.co/onnx-community/depth-anything-v2-small)) on Node (CPU) and writes output readable by [`photospace-runtime`](https://github.com/atsekkei/photospace/tree/main/packages/runtime).
+It turns photos into portable, depth-aware assets for creative web runtimes: AVIF/WebP/JPEG photo variants plus `depth.png` / `meta.json` and optional `mask.png` / `normal.png`. It runs monocular depth estimation ([Depth Anything V2](https://huggingface.co/onnx-community/depth-anything-v2-small)) on Node (CPU) and writes output readable by [`depthbake-runtime`](https://github.com/atsekkei/depthbake/tree/main/packages/runtime).
 
 ## Install
 
 ```bash
-npm install -g photospace-cli
+npm install -g depthbake-cli
 ```
 
-Or run it without installing via `npx photospace-cli`.
+Or run it without installing via `npx depthbake-cli`.
 
 Requires Node 20+. Because it includes the native binaries of `sharp` and `onnxruntime-node`, it runs only on supported platforms (macOS/Linux/Windows, x64 and arm64).
 
 ## Usage
 
 ```bash
-photospace bake ./photos --out ./out
+depthbake bake ./photos --out ./out
 ```
 
 - `<patterns...>`: one or more image file paths, glob patterns, or directories (passing a directory targets the `jpg/jpeg/png/webp/avif/tiff` files directly inside it)
 - `--out <dir>`: output directory (default `out`). One package directory is written to `out/<name>/` per file
-- `--config <path>`: path to `photospace.config.json` (defaults are used when omitted)
+- `--config <path>`: path to `depthbake.config.json` (defaults are used when omitted)
 - `--mask`: bundle `mask.png` (sky + edge masks); overrides `maps.mask` in the config
 - `--normal`: bundle `normal.png` (world-space normals); overrides `maps.normal` in the config
 
-> `mask.png` / `normal.png` are baked purely from depth + camera meta, so consumers can derive the same data at runtime instead — `photospace-runtime` exports `computeSkyMask` / `computeEdgeMask` / `computeNormals`, and `GLSL_SNIPPETS.screenSpaceNormal` covers the in-shader case. Skipping the maps shrinks the package, and under a `maps.maxBytes` cap the freed budget raises the depth resolution. Bundle them only when you want to skip the runtime derivation cost.
+> `mask.png` / `normal.png` are baked purely from depth + camera meta, so consumers can derive the same data at runtime instead — `depthbake-runtime` exports `computeSkyMask` / `computeEdgeMask` / `computeNormals`, and `GLSL_SNIPPETS.screenSpaceNormal` covers the in-shader case. Skipping the maps shrinks the package, and under a `maps.maxBytes` cap the freed budget raises the depth resolution. Bundle them only when you want to skip the runtime derivation cost.
 
 The SHA-256 hash of the photo bytes + config is recorded in `meta.json` as `sourceHash`, so re-running on identical input skips the bake.
 
@@ -70,13 +70,13 @@ Fields may be omitted; defaults are merged per section.
 
 ## Output format
 
-See [`docs/package-format.md`](https://github.com/atsekkei/photospace/blob/main/docs/package-format.md) for the full spec of the package written by the CLI.
+See [`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) for the full spec of the package written by the CLI.
 
 ## Building from source
 
 ```bash
 pnpm install
-pnpm --filter photospace-cli build
+pnpm --filter depthbake-cli build
 node packages/cli/dist/index.js bake ./photos
 ```
 

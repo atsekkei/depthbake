@@ -1,16 +1,16 @@
 {
-  "name": "photospace-cli",
-  "version": "0.4.0",
-  "description": "Local-first Photospace package baker for depth-aware creative web assets.",
+  "name": "depthbake-cli",
+  "version": "1.0.0",
+  "description": "Local-first Depthbake package baker for depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atsekkei/photospace.git",
+    "url": "https://github.com/atsekkei/depthbake.git",
     "directory": "packages/cli"
   },
   "bin": {
-    "photospace": "./dist/index.js"
+    "depthbake": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
-    "photospace-core": "workspace:*",
+    "depthbake-core": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "~6.0.2"
   }

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { bakeFromDisparity, type SourcePhoto } from "../src/bake.ts";
-import { DEFAULT_CONFIG, type PhotoSpaceConfig } from "../src/pack.ts";
+import { DEFAULT_CONFIG, type DepthbakeConfig } from "../src/pack.ts";
 
 const photo: SourcePhoto = {
   fileName: "photo.jpg",
@@ -35,7 +35,7 @@ test("bakeFromDisparity uses a precomputed sourceHash when provided", async () =
 });
 
 test("bakeFromDisparity declares and returns maps when enabled", async () => {
-  const config: PhotoSpaceConfig = {
+  const config: DepthbakeConfig = {
     ...DEFAULT_CONFIG,
     maps: { ...DEFAULT_CONFIG.maps, mask: true, normal: true },
   };

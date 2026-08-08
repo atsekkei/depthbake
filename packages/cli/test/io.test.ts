@@ -4,10 +4,10 @@ import { mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
-import { DEFAULT_CONFIG, type PhotoSpaceMeta } from "photospace-core";
+import { DEFAULT_CONFIG, type DepthbakeMeta } from "depthbake-core";
 import { encodeMaps, encodePhotoSources, loadSourcePhoto, writePackage } from "../src/io.ts";
 
-function testMeta(): PhotoSpaceMeta {
+function testMeta(): DepthbakeMeta {
   return {
     version: 2,
     source: { file: "source.jpg", width: 4, height: 4 },
@@ -70,7 +70,7 @@ test("encodeMaps stays lossless beyond 256 unique colors (no palette quantizatio
 });
 
 test("writePackage omits mask/normal files when not bundled", async () => {
-  const outDir = await mkdtemp(path.join(tmpdir(), "photospace-io-"));
+  const outDir = await mkdtemp(path.join(tmpdir(), "depthbake-io-"));
   const rgba = new Uint8ClampedArray(4 * 4 * 4).fill(127);
   const maps = await encodeMaps({ depthRgba: rgba, width: 4, height: 4, compressionLevel: 9, effort: 7 });
   await writePackage({
@@ -83,7 +83,7 @@ test("writePackage omits mask/normal files when not bundled", async () => {
 });
 
 test("writePackage publishes only the new package files and cleans temporary directories", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "photospace-io-"));
+  const root = await mkdtemp(path.join(tmpdir(), "depthbake-io-"));
   const outDir = path.join(root, "package");
   await writeFile(path.join(root, "unrelated.txt"), "keep");
 
@@ -119,7 +119,7 @@ test("writePackage publishes only the new package files and cleans temporary dir
 });
 
 test("writePackage keeps the existing package when a new write fails", async () => {
-  const root = await mkdtemp(path.join(tmpdir(), "photospace-io-"));
+  const root = await mkdtemp(path.join(tmpdir(), "depthbake-io-"));
   const outDir = path.join(root, "package");
   const rgba = new Uint8ClampedArray(4 * 4 * 4).fill(127);
   const maps = await encodeMaps({ depthRgba: rgba, width: 4, height: 4, compressionLevel: 9 });
@@ -164,7 +164,7 @@ test("encodePhotoSources emits configured formats at one bounded resolution", as
 
 for (const orientation of [6, 8]) {
   test(`loadSourcePhoto normalizes EXIF orientation ${orientation} for baking and model input`, async () => {
-    const dir = await mkdtemp(path.join(tmpdir(), "photospace-io-"));
+    const dir = await mkdtemp(path.join(tmpdir(), "depthbake-io-"));
     const file = path.join(dir, `orientation-${orientation}.jpg`);
     const input = await sharp({
       create: { width: 3, height: 5, channels: 3, background: { r: 20, g: 40, b: 60 } },

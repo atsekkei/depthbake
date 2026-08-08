@@ -6,7 +6,7 @@ import path from "node:path";
 import { loadConfig } from "../src/bake.ts";
 
 async function writeConfig(json: unknown): Promise<string> {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-config-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-config-"));
   const file = path.join(dir, "config.json");
   await writeFile(file, JSON.stringify(json));
   return file;

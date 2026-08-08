@@ -1,15 +1,20 @@
 {
-  "name": "photospace-runtime",
-  "version": "0.3.0",
-  "description": "Renderer-agnostic Photospace runtime for depth-aware creative web assets.",
+  "name": "depthbake-runtime",
+  "version": "1.0.0",
+  "description": "Renderer-agnostic Depthbake runtime for depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atsekkei/photospace.git",
+    "url": "https://github.com/atsekkei/depthbake.git",
     "directory": "packages/runtime"
   },
-  "keywords": ["photo-space", "depth", "webgl", "three.js"],
+  "keywords": [
+    "photo-space",
+    "depth",
+    "webgl",
+    "three.js"
+  ],
   "main": "./dist/loader.js",
   "module": "./dist/loader.js",
   "types": "./dist/loader.d.ts",

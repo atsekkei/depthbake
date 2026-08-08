@@ -3,11 +3,11 @@ import path from "node:path";
 import sharp from "sharp";
 import type {
   SourcePhoto,
-  PhotoSpaceConfig,
-  PhotoSpaceMeta,
+  DepthbakeConfig,
+  DepthbakeMeta,
   PhotoFormat,
   PhotoMimeType,
-} from "photospace-core";
+} from "depthbake-core";
 
 /** 元画像ファイルを読み込み、bakePhoto()へ渡せる形(RGBAピクセル込み)に変換する */
 export async function loadSourcePhoto(filePath: string): Promise<SourcePhoto> {
@@ -101,7 +101,7 @@ const PHOTO_OUTPUTS: Record<PhotoFormat, { file: string; type: PhotoMimeType }> 
 
 export async function encodePhotoSources(
   photoBytes: Uint8Array,
-  config: PhotoSpaceConfig["photo"],
+  config: DepthbakeConfig["photo"],
 ): Promise<EncodedPhotoSource[]> {
   const formats = [...new Set(config.formats)];
   if (formats.length === 0) throw new Error("photo.formatsには1形式以上を指定してください。");
@@ -128,7 +128,7 @@ export interface WritePackageInput {
   outDir: string;
   photoSources: EncodedPhotoSource[];
   maps: EncodedMaps;
-  meta: PhotoSpaceMeta;
+  meta: DepthbakeMeta;
 }
 
 async function pathExists(filePath: string): Promise<boolean> {

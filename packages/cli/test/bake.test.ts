@@ -32,7 +32,7 @@ async function captureConsoleLog<T>(fn: () => Promise<T>): Promise<{ result: T; 
 }
 
 test("runBake reports failure when no input files match", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-bake-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-bake-"));
   const pattern = path.join(dir, "*.jpg");
   const { result, messages } = await captureConsoleError(() => runBake([pattern], { out: path.join(dir, "out") }));
 
@@ -42,7 +42,7 @@ test("runBake reports failure when no input files match", async () => {
 });
 
 test("runBake dry-run resolves outputs without decoding images or loading the model", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-bake-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-bake-"));
   const input = path.join(dir, "hero.jpg");
   await writeFile(input, "not an image");
 
@@ -57,7 +57,7 @@ test("runBake dry-run resolves outputs without decoding images or loading the mo
 });
 
 test("runBake quiet suppresses dry-run human output", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-bake-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-bake-"));
   const input = path.join(dir, "hero.jpg");
   await writeFile(input, "not an image");
 
@@ -68,7 +68,7 @@ test("runBake quiet suppresses dry-run human output", async () => {
 });
 
 test("runBake detects output-name collisions before loading inputs", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "photospace-bake-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "depthbake-bake-"));
   const a = path.join(dir, "campaign-a");
   const b = path.join(dir, "campaign-b");
   await mkdir(a);

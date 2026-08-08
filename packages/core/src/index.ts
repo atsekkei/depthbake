@@ -29,8 +29,8 @@ export {
   packNormal,
   computeSourceHash,
   DEFAULT_CONFIG,
-  type PhotoSpaceConfig,
-  type PhotoSpaceMeta,
+  type DepthbakeConfig,
+  type DepthbakeMeta,
   type PhotoFormat,
   type PhotoMimeType,
 } from "./pack.ts";

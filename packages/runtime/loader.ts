@@ -1,9 +1,9 @@
 /**
- * photospace CLI が書き出す meta.json の型。version 1(旧形式)と2の両方を読む。
- * v2の書き込み側の型は packages/core/src/pack.ts の PhotoSpaceMeta と同じ形。
+ * depthbake CLI が書き出す meta.json の型。version 1(旧形式)と2の両方を読む。
+ * v2の書き込み側の型は packages/core/src/pack.ts の DepthbakeMeta と同じ形。
  * runtime はビルド後に単体で配布されるため、コア側の型をimportせずここに複製している。
  */
-interface PhotoSpaceMetaShared {
+interface DepthbakeMetaShared {
   source: { file: string; width: number; height: number };
   /** fileは旧runtime向け第一候補。新runtimeはsourcesを記載順にデコードする。 */
   photo?: {
@@ -27,18 +27,18 @@ interface PhotoSpaceMetaShared {
 }
 
 /** v1: mask.png/normal.pngが常に同梱され、metaに宣言フィールドを持たない */
-export interface PhotoSpaceMetaV1 extends PhotoSpaceMetaShared {
+export interface DepthbakeMetaV1 extends DepthbakeMetaShared {
   version: 1;
 }
 
 /** v2: photo.jpgが必須の最終フォールバック。mask/normalはフィールドが存在する場合のみ同梱 */
-export interface PhotoSpaceMetaV2 extends PhotoSpaceMetaShared {
+export interface DepthbakeMetaV2 extends DepthbakeMetaShared {
   version: 2;
   mask?: { file: string };
   normal?: { file: string };
 }
 
-export type PhotoSpaceMeta = PhotoSpaceMetaV1 | PhotoSpaceMetaV2;
+export type DepthbakeMeta = DepthbakeMetaV1 | DepthbakeMetaV2;
 
 /** 幅・高さ付きFloat32ラスタ(coreのRasterF32と同形。深度・マスク類の共通表現) */
 export interface RasterF32 {
@@ -233,8 +233,8 @@ export interface LoadPackageOptions {
  * GPUへBitmapを直接アップロードするだけの利用者はCPU復元コストを一切払わない。
  * 注意: *Bitmapをclose()するのは、対応する遅延フィールドへアクセスした後にすること。
  */
-export interface PartialPhotoSpacePackage {
-  meta: PhotoSpaceMeta;
+export interface PartialDepthbakePackage {
+  meta: DepthbakeMeta;
   /** meta.photo.sourcesのうち最初にデコードできた写真(テクスチャソースとしてそのまま使える) */
   photo?: ImageBitmap;
   /**
@@ -259,7 +259,7 @@ export interface PartialPhotoSpacePackage {
 }
 
 /** need未指定(全部読む)時の型。photo/depthは必ず存在する */
-export interface PhotoSpacePackage extends PartialPhotoSpacePackage {
+export interface DepthbakePackage extends PartialDepthbakePackage {
   photo: ImageBitmap;
   depthBitmap: ImageBitmap;
   readonly depth: Float32Array;
@@ -284,10 +284,10 @@ function markHandled<T>(promise: Promise<T>): Promise<T> {
   return promise;
 }
 
-async function fetchMeta(base: string, init?: RequestInit): Promise<PhotoSpaceMeta> {
+async function fetchMeta(base: string, init?: RequestInit): Promise<DepthbakeMeta> {
   const response = await fetch(new URL("meta.json", base), init);
   if (!response.ok) throw new Error(`meta.jsonを取得できませんでした (${response.status})`);
-  return (await response.json()) as PhotoSpaceMeta;
+  return (await response.json()) as DepthbakeMeta;
 }
 
 /** データ用マップ(depth/mask/normal)のフェッチ+デコード。色管理によるピクセル値変換を無効化する */
@@ -307,13 +307,13 @@ function rasterizeBitmap(bitmap: ImageBitmap): Uint8ClampedArray {
 }
 
 /** metaから取得すべきマップファイル名を決める。v1は全マップ必須、v2は宣言されたものだけ */
-export function packageMapFiles(meta: PhotoSpaceMeta): { mask?: string; normal?: string } {
+export function packageMapFiles(meta: DepthbakeMeta): { mask?: string; normal?: string } {
   if (meta.version === 1) return { mask: "mask.png", normal: "normal.png" };
   if (meta.version === 2) return { mask: meta.mask?.file, normal: meta.normal?.file };
   throw new Error(`未対応のパッケージversionです: ${(meta as { version: number }).version}`);
 }
 
-export function photoFileCandidates(meta: PhotoSpaceMeta): string[] {
+export function photoFileCandidates(meta: DepthbakeMeta): string[] {
   const files = meta.photo?.sources?.map((source) => source.file) ?? [];
   if (meta.photo) files.push(meta.photo.file);
   // v2はphoto.jpgが必須なので常に最終候補へ。v1は従来どおりphoto.avifを既定にする。
@@ -323,7 +323,7 @@ export function photoFileCandidates(meta: PhotoSpaceMeta): string[] {
 
 async function fetchPhotoBitmap(
   base: string,
-  meta: PhotoSpaceMeta,
+  meta: DepthbakeMeta,
   init?: RequestInit,
 ): Promise<ImageBitmap> {
   const failures: string[] = [];
@@ -384,31 +384,31 @@ function unpackNormal(rgba: Uint8ClampedArray): { nx: Float32Array; ny: Float32A
  *
  * needで除外した要素のpromiseはundefinedで解決する(rejectしない)。
  */
-export interface StagedPhotoSpacePackage {
-  readonly meta: Promise<PhotoSpaceMeta>;
+export interface StagedDepthbakePackage {
+  readonly meta: Promise<DepthbakeMeta>;
   readonly photo: Promise<ImageBitmap | undefined>;
   readonly depthBitmap: Promise<ImageBitmap | undefined>;
   readonly maskBitmap: Promise<ImageBitmap | undefined>;
   readonly normalBitmap: Promise<ImageBitmap | undefined>;
   /** 全構成要素が揃ったパッケージ。loadPackage()が返すものと同じ */
-  readonly ready: Promise<PartialPhotoSpacePackage>;
+  readonly ready: Promise<PartialDepthbakePackage>;
 }
 
 /** 取得済みのビットマップ群から、Float32を遅延復元するパッケージを組み立てる */
 function buildPackage(
-  meta: PhotoSpaceMeta,
+  meta: DepthbakeMeta,
   photo: ImageBitmap | undefined,
   depthBitmap: ImageBitmap | undefined,
   maskBitmap: ImageBitmap | undefined,
   normalBitmap: ImageBitmap | undefined,
-): PartialPhotoSpacePackage {
+): PartialDepthbakePackage {
   // Float32復元は初回アクセス時に行い、以降はキャッシュを返す。
   // Bitmapをテクスチャへ直接アップロードするだけの利用者はこのコストを払わない。
   let depthCache: Float32Array | undefined;
   let maskCache: { sky: Float32Array; edge: Float32Array } | undefined;
   let normalCache: { nx: Float32Array; ny: Float32Array; nz: Float32Array } | undefined;
 
-  const pkg: PartialPhotoSpacePackage = {
+  const pkg: PartialDepthbakePackage = {
     meta,
     photo,
     depthBitmap,
@@ -439,12 +439,12 @@ function buildPackage(
 /**
  * baseUrl配下のパッケージを段階的に読み込む。同期で返り、fetchは即座に始まる。
  * 各構成要素は届いた順に個別のpromiseとして解決するので、全部揃うのを待たずに
- * 使い始められる(詳細は StagedPhotoSpacePackage)。
+ * 使い始められる(詳細は StagedDepthbakePackage)。
  */
 export function loadPackageStaged(
   baseUrl: string | URL,
   options: LoadPackageOptions = {},
-): StagedPhotoSpacePackage {
+): StagedDepthbakePackage {
   const normalized = typeof baseUrl === "string" && !baseUrl.endsWith("/") ? baseUrl + "/" : baseUrl;
   const base = new URL(normalized, location.href).toString();
   const init = requestInitFor(options);
@@ -454,7 +454,7 @@ export function loadPackageStaged(
   // 未対応versionはどのマップを取りに行くより先に弾く(loadPackageの従来の順序を保つ)
   const checked = markHandled(meta.then((m) => ({ meta: m, files: packageMapFiles(m) })));
 
-  const stage = <T>(wanted: boolean, fn: (c: { meta: PhotoSpaceMeta; files: { mask?: string; normal?: string } }) => Promise<T> | T) =>
+  const stage = <T>(wanted: boolean, fn: (c: { meta: DepthbakeMeta; files: { mask?: string; normal?: string } }) => Promise<T> | T) =>
     markHandled(wanted ? checked.then(fn) : Promise.resolve(undefined as T | undefined));
 
   const photo = stage(need.has("photo"), ({ meta }) => fetchPhotoBitmap(base, meta, init));
@@ -478,16 +478,16 @@ export function loadPackageStaged(
 }
 
 /** baseUrl配下の写真/depth.png/meta.json(+metaが宣言するmask/normal)を読み込む */
-export function loadPackage(baseUrl: string | URL): Promise<PhotoSpacePackage>;
-/** need指定時はスキップした要素がundefinedになる(PartialPhotoSpacePackage) */
-export function loadPackage(baseUrl: string | URL, options: LoadPackageOptions): Promise<PartialPhotoSpacePackage>;
-export function loadPackage(baseUrl: string | URL, options?: LoadPackageOptions): Promise<PhotoSpacePackage> {
-  // need未指定時はphoto/depthが必ず埋まるため、公開型としてはPhotoSpacePackageに一致する
-  return loadPackageStaged(baseUrl, options).ready as Promise<PhotoSpacePackage>;
+export function loadPackage(baseUrl: string | URL): Promise<DepthbakePackage>;
+/** need指定時はスキップした要素がundefinedになる(PartialDepthbakePackage) */
+export function loadPackage(baseUrl: string | URL, options: LoadPackageOptions): Promise<PartialDepthbakePackage>;
+export function loadPackage(baseUrl: string | URL, options?: LoadPackageOptions): Promise<DepthbakePackage> {
+  // need未指定時はphoto/depthが必ず埋まるため、公開型としてはDepthbakePackageに一致する
+  return loadPackageStaged(baseUrl, options).ready as Promise<DepthbakePackage>;
 }
 
 /** meta.json の camera 情報を使い、uv+視差からワールド座標を逆算する */
-export function worldPositionFromMeta(meta: PhotoSpaceMeta, u: number, v: number, disparity: number): [number, number, number] {
+export function worldPositionFromMeta(meta: DepthbakeMeta, u: number, v: number, disparity: number): [number, number, number] {
   const aspect = meta.source.width / meta.source.height;
   const tanHalfFov = Math.tan((meta.camera.fovDeg * Math.PI) / 360);
   return worldPosition(u, v, disparity, aspect, tanHalfFov, meta.camera.farRange);

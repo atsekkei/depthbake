@@ -3,7 +3,7 @@ import { Viewer } from "./viewer/gl.ts";
 import { bindDropzone } from "./ui/dropzone.ts";
 import { bindButtonGroup, bindSlider } from "./ui/controls.ts";
 import { downloadPackage, rasterizeToCanvas } from "./ui/exports.ts";
-import { loadDepthModel, estimateDepth, type DepthModel, normalizeDisparity, DEFAULT_CONFIG, type PhotoFormat, type PhotoSpaceConfig, type RasterF32 } from "photospace-core";
+import { loadDepthModel, estimateDepth, type DepthModel, normalizeDisparity, DEFAULT_CONFIG, type PhotoFormat, type DepthbakeConfig, type RasterF32 } from "depthbake-core";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const cv = $<HTMLCanvasElement>("cv");
@@ -164,7 +164,7 @@ packageForm.addEventListener("submit", async (event) => {
     "jpeg",
   ];
   const mapMaxMb = $<HTMLInputElement>("mapMaxMb").valueAsNumber;
-  const config: PhotoSpaceConfig = {
+  const config: DepthbakeConfig = {
     ...DEFAULT_CONFIG,
     camera: { fovDeg: viewer.state.fov, farRange: viewer.state.far },
     sky: { threshold: viewer.state.sky },
