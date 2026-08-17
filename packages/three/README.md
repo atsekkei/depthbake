@@ -1,6 +1,6 @@
 # depthbake-three
 
-three.js loader for [Depthbake](https://github.com/atsekkei/depthbake) depth-aware creative web assets.
+three.js loader for [Depthbake](https://github.com/roukara/depthbake) depth-aware creative web assets.
 
 It turns a baked Depthbake package into three.js textures and a matching uniform bundle, so you can write your own shader instead of re-deriving the texture setup on every project. It deliberately does **not** ship a default effect, a motion system, or input binders — those belong to your project.
 

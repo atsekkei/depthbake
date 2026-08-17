@@ -5,6 +5,7 @@
   "description": "Depthbake の推論・正規化・アップサンプリング・パッキングの共有ロジック(viewer/CLI 双方から利用、非公開ワークスペース内部パッケージ)",
   "type": "module",
   "license": "MIT",
+  "author": "Roukara",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

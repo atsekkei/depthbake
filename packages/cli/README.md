@@ -4,7 +4,7 @@
 
 A local-first batch baker for Depthbake packages.
 
-It turns photos into portable, depth-aware assets for creative web runtimes: AVIF/WebP/JPEG photo variants plus `depth.png` / `meta.json` and optional `mask.png` / `normal.png`. It runs monocular depth estimation ([Depth Anything V2](https://huggingface.co/onnx-community/depth-anything-v2-small)) on Node (CPU) and writes output readable by [`depthbake-runtime`](https://github.com/atsekkei/depthbake/tree/main/packages/runtime).
+It turns photos into portable, depth-aware assets for creative web runtimes: AVIF/WebP/JPEG photo variants plus `depth.png` / `meta.json` and optional `mask.png` / `normal.png`. It runs monocular depth estimation ([Depth Anything V2](https://huggingface.co/onnx-community/depth-anything-v2-small)) on Node (CPU) and writes output readable by [`depthbake-runtime`](https://github.com/roukara/depthbake/tree/main/packages/runtime).
 
 ## Install
 
@@ -70,7 +70,7 @@ Fields may be omitted; defaults are merged per section.
 
 ## Output format
 
-See [`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) for the full spec of the package written by the CLI.
+See [`docs/package-format.md`](https://github.com/roukara/depthbake/blob/main/docs/package-format.md) for the full spec of the package written by the CLI.
 
 ## Building from source
 

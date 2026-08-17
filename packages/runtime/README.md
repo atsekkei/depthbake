@@ -4,7 +4,7 @@
 
 A lightweight runtime for using Depthbake packages in creative web projects.
 
-It reads a package baked by [`depthbake-cli`](https://github.com/atsekkei/depthbake/tree/main/packages/cli), selects a decodable AVIF/WebP/JPEG photo candidate, exposes GPU-ready depth/mask/normal bitmaps, and provides helpers for recovering world-space positions. It is renderer-agnostic, so it works with three.js, raw WebGL, Canvas2D, or custom shaders.
+It reads a package baked by [`depthbake-cli`](https://github.com/roukara/depthbake/tree/main/packages/cli), selects a decodable AVIF/WebP/JPEG photo candidate, exposes GPU-ready depth/mask/normal bitmaps, and provides helpers for recovering world-space positions. It is renderer-agnostic, so it works with three.js, raw WebGL, Canvas2D, or custom shaders.
 
 ## Install
 
@@ -38,9 +38,9 @@ The decoded PNGs are exposed as `ImageBitmap`s (`depthBitmap` / `maskBitmap` / `
 
 To wire it directly into your own shader, use `GLSL_SNIPPETS.unpackAndSampleDepthRgba8` (direct RGBA8 upload) or `GLSL_SNIPPETS.unpackAndSampleDepth` (Float32 `DataTexture` from `pkg.depth`), plus `GLSL_SNIPPETS.worldPosition`. Because the RG16 packing cannot use the GPU's bilinear interpolation, both sample with NEAREST plus manual bilinear filtering.
 
-See [`examples/three-scene`](https://github.com/atsekkei/depthbake/tree/main/examples/three-scene) for a three.js implementation.
+See [`examples/three-scene`](https://github.com/roukara/depthbake/tree/main/examples/three-scene) for a three.js implementation.
 
-> **Browser-only.** The loader relies on `fetch`, `createImageBitmap`, and `OffscreenCanvas`, so it runs in the browser (or a Worker), not in Node. To bake packages from Node, use [`depthbake-cli`](https://github.com/atsekkei/depthbake/tree/main/packages/cli).
+> **Browser-only.** The loader relies on `fetch`, `createImageBitmap`, and `OffscreenCanvas`, so it runs in the browser (or a Worker), not in Node. To bake packages from Node, use [`depthbake-cli`](https://github.com/roukara/depthbake/tree/main/packages/cli).
 
 ## API
 
@@ -123,11 +123,11 @@ vec3 n = nrm(p);
 
 ### Types
 
-`DepthbakeMeta`, `DepthbakePackage`, `PartialDepthbakePackage`, `LoadPackageOptions`, `PackageComponent`, `RasterF32`, and `NormalRaster` are exported for TypeScript consumers. `DepthbakeMeta` mirrors `meta.json` — see [`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) for the field-by-field spec.
+`DepthbakeMeta`, `DepthbakePackage`, `PartialDepthbakePackage`, `LoadPackageOptions`, `PackageComponent`, `RasterF32`, and `NormalRaster` are exported for TypeScript consumers. `DepthbakeMeta` mirrors `meta.json` — see [`docs/package-format.md`](https://github.com/roukara/depthbake/blob/main/docs/package-format.md) for the field-by-field spec.
 
 ## Package format
 
-[`docs/package-format.md`](https://github.com/atsekkei/depthbake/blob/main/docs/package-format.md) documents the fields in detail along with the compatibility policy. The `version` field in `meta.json` guards against future format changes; this loader reads versions 1 and 2 and throws on anything else.
+[`docs/package-format.md`](https://github.com/roukara/depthbake/blob/main/docs/package-format.md) documents the fields in detail along with the compatibility policy. The `version` field in `meta.json` guards against future format changes; this loader reads versions 1 and 2 and throws on anything else.
 
 > **Breaking change in 0.2.0:** `skyMask`, `edgeMask`, and `normal` are now optional — version 2 packages bundle `mask.png` / `normal.png` only when baked with them enabled. Runtimes ≤0.1.x cannot read v2 packages baked without both maps.
 

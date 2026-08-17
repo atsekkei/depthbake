@@ -4,9 +4,10 @@
   "description": "Local-first Depthbake package baker for depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",
+  "author": "Roukara",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atsekkei/depthbake.git",
+    "url": "https://github.com/roukara/depthbake.git",
     "directory": "packages/cli"
   },
   "bin": {
