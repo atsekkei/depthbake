@@ -1,6 +1,6 @@
 {
   "name": "depthbake-runtime",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Renderer-agnostic Depthbake runtime for depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",

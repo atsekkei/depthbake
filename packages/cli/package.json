@@ -1,6 +1,6 @@
 {
   "name": "depthbake-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Local-first Depthbake package baker for depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",

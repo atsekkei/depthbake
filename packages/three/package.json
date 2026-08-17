@@ -1,6 +1,6 @@
 {
   "name": "depthbake-three",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "three.js loader for Depthbake depth-aware creative web assets.",
   "type": "module",
   "license": "MIT",
